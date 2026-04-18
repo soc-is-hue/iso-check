@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>クリーニング業 ISO内部監査システム v4</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1F3864;--navy-mid:#2E4F8A;--navy-light:#BDD7EE;
+  --coral:#993C1D;--coral-light:#FAECE7;--coral-mid:#F5C4B3;
+  --teal:#0F6E56;--teal-light:#E1F5EE;
+  --blue:#185FA5;--blue-light:#E6F1FB;
+  --gold:#C9920A;--gold-light:#FFF9E6;
+  --gray1:#F5F5F5;--gray2:#EEEEEE;--gray3:#DDDDDD;--gray4:#AAAAAA;--gray5:#666666;
+  --text:#1A1A2E;
+  --red-soft:#FCEBEB;--red-mid:#F7C1C1;--red-text:#791F1F;
+  --green-soft:#EAF3DE;
+  --shadow:0 2px 8px rgba(0,0,0,.10);
+  --shadow-lg:0 4px 20px rgba(0,0,0,.15);
+}
+body{font-family:'Noto Sans JP',sans-serif;background:#EAECF0;min-height:100vh;padding:.75rem}
+.app{max-width:1040px;margin:0 auto}
+
+/* ── LOGIN SCREEN ── */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);margin:-.75rem;padding:1rem}
+.login-box{background:#fff;border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:400px;box-shadow:var(--shadow-lg)}
+.login-logo{text-align:center;margin-bottom:1.5rem}
+.login-logo h1{font-size:18px;font-weight:700;color:var(--navy);margin-top:8px}
+.login-logo p{font-size:11px;color:var(--gray4);margin-top:4px}
+.login-field{margin-bottom:1rem}
+.login-field label{display:block;font-size:12px;color:var(--gray5);font-weight:500;margin-bottom:5px}
+.login-field input{width:100%;padding:10px 12px;border:1.5px solid var(--gray3);border-radius:8px;font-size:14px;font-family:'Noto Sans JP',sans-serif;outline:none;transition:border .15s}
+.login-field input:focus{border-color:var(--blue)}
+.login-btn{width:100%;padding:12px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:background .15s;margin-top:.5rem}
+.login-btn:hover{background:#162A4F}
+.login-btn:disabled{background:var(--gray3);cursor:not-allowed}
+.login-err{background:var(--red-soft);border:1px solid var(--red-mid);color:var(--red-text);border-radius:6px;padding:8px 12px;font-size:12px;margin-top:.75rem;text-align:center}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);border-radius:10px;padding:18px 22px;margin-bottom:.875rem;display:flex;align-items:center;justify-content:space-between}
+.hdr-left h1{font-size:16px;font-weight:500;color:#fff;letter-spacing:.04em}
+.hdr-left p{font-size:10px;color:var(--navy-light);margin-top:3px}
+.hdr-right{display:flex;gap:6px;align-items:center}
+.user-badge{font-size:11px;color:var(--navy-light);background:rgba(255,255,255,.1);padding:4px 10px;border-radius:100px}
+
+/* ── NAV TABS ── */
+.nav{display:flex;gap:0;background:#fff;border-radius:8px;padding:4px;margin-bottom:.875rem;box-shadow:var(--shadow)}
+.nav-btn{flex:1;padding:9px 8px;border:none;background:transparent;border-radius:6px;font-size:12px;font-family:'Noto Sans JP',sans-serif;font-weight:500;color:var(--gray5);cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:5px}
+.nav-btn:hover{background:var(--gray1)}
+.nav-btn.on{background:var(--navy);color:#fff}
+.nav-btn .nb{font-size:15px}
+
+/* ── CARD ── */
+.card{background:#fff;border-radius:8px;padding:1rem 1.25rem;margin-bottom:.75rem;box-shadow:var(--shadow)}
+.slbl{font-size:10px;font-weight:700;color:var(--gray4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+
+/* ── FORM ELEMENTS ── */
+input[type=text],input[type=password],input[type=date],select,textarea{font-family:'Noto Sans JP',sans-serif;font-size:12px;padding:7px 10px;border:1px solid var(--gray3);border-radius:5px;outline:none;width:100%;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+.info-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.info-lbl{font-size:11px;color:var(--gray5);margin-bottom:4px}
+
+/* ── BUTTONS ── */
+.btn{padding:8px 16px;border:none;border-radius:6px;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#0C447C}
+.btn-navy{background:var(--navy);color:#fff}.btn-navy:hover{background:#162A4F}
+.btn-teal{background:var(--teal);color:#fff}.btn-teal:hover{background:#085041}
+.btn-coral{background:var(--coral);color:#fff}.btn-coral:hover{background:#7B2911}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:#9E720A}
+.btn-ghost{background:#fff;border:1px solid var(--gray3);color:var(--gray5)}.btn-ghost:hover{background:var(--gray1)}
+.btn-sm{padding:5px 11px;font-size:11px;border-radius:5px}
+.btn-xs{padding:3px 8px;font-size:10px;border-radius:4px}
+.btn:disabled{background:var(--gray3);color:var(--gray4);cursor:not-allowed}
+.gen-btn{width:100%;padding:13px;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;font-family:'Noto Sans JP',sans-serif}
+
+/* ── STD BUTTONS ── */
+.std-row{display:flex;gap:8px}
+.std-btn{width:100%;padding:10px;border:0.5px solid var(--gray3);border-radius:6px;background:#fff;cursor:pointer;text-align:center;color:#333;transition:all .15s;font-family:'Noto Sans JP',sans-serif}
+.std-row>div{flex:1}
+.std-btn:hover{background:var(--gray1)}
+.std-btn.on{border:2px solid var(--coral);background:var(--coral-light)}
+.std-btn .sc{font-size:14px;font-weight:500;color:var(--coral)}
+.std-btn .sn{font-size:10px;color:var(--gray4);margin-top:2px}
+
+/* ── DEPT TREE ── */
+.dept-tree{display:flex;flex-direction:column;gap:6px}
+.grp{border:0.5px solid var(--gray3);border-radius:6px;overflow:hidden}
+.grp-hdr{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--gray1);cursor:pointer;user-select:none}
+.grp-hdr:hover{background:var(--gray2)}
+.grp-name{font-size:13px;font-weight:500;color:#333;flex:1}
+.grp-cnt{font-size:10px;color:var(--gray5);background:#fff;border:0.5px solid var(--gray3);border-radius:100px;padding:1px 7px}
+.grp-arr{font-size:10px;color:var(--gray4);transition:transform .2s}
+.grp-arr.open{transform:rotate(90deg)}
+.grp-body{padding:10px 12px;display:none;border-top:0.5px solid var(--gray3)}
+.grp-body.open{display:block}
+.sub-lbl{font-size:10px;color:var(--gray4);margin-bottom:5px;padding-left:6px;border-left:2px solid var(--gray3)}
+.chip-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.chip{padding:4px 10px;border:0.5px solid var(--gray3);border-radius:100px;background:#fff;cursor:pointer;font-size:11px;color:#333;transition:all .15s;white-space:nowrap;font-family:'Noto Sans JP',sans-serif}
+.chip:hover{background:var(--gray1)}
+.chip.on{border:2px solid var(--blue);background:var(--blue-light);color:#0C447C;font-weight:500}
+.chip.all-chip{border-style:dashed;color:var(--gray4);font-size:10px}
+.chip.all-chip.on{border-style:solid}
+
+/* ── CLAUSE GRID ── */
+.clause-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.clause-item{border:0.5px solid var(--gray3);border-radius:6px;padding:8px 10px;background:#fff}
+.clause-item.iso9{border-left:3px solid var(--coral)}
+.clause-item.iso22{border-left:3px solid var(--blue)}
+.clause-hdr{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.clause-tag{font-size:10px;font-weight:500;padding:2px 6px;border-radius:4px}
+.tag-9{background:var(--coral-light);color:var(--coral)}
+.tag-22{background:var(--blue-light);color:#0C447C}
+.clause-name{font-size:11px;color:#333;font-weight:500;flex:1}
+.clause-counts{display:flex;gap:6px;margin-top:4px}
+.cnt-box{display:flex;align-items:center;gap:4px;flex:1}
+.cnt-lbl{font-size:10px;color:var(--gray4);white-space:nowrap}
+.cnt-box input{width:44px;font-size:11px;text-align:center;padding:3px 4px;border:1px solid var(--gray3);border-radius:4px}
+
+/* ── LEVEL BUTTONS ── */
+.lvl-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.lvl-btn{padding:10px 6px;border:0.5px solid var(--gray3);border-radius:6px;background:#fff;cursor:pointer;text-align:center;color:#333;transition:all .15s;font-family:'Noto Sans JP',sans-serif}
+.lvl-btn:hover{background:var(--gray1)}
+.lvl-btn.on{border:2px solid var(--teal);background:var(--teal-light)}
+.lvl-icon{font-size:18px;display:block;margin-bottom:3px}
+.lvl-name{font-size:11px;font-weight:500;color:var(--teal)}
+.lvl-sub{font-size:10px;color:var(--gray4);margin-top:2px;line-height:1.4}
+
+/* ── LOADING ── */
+.loading{text-align:center;padding:2rem;color:var(--gray4);font-size:13px}
+.spinner{width:28px;height:28px;border:2px solid var(--gray3);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESULT ── */
+.res-tabs{display:flex;gap:0;border-bottom:0.5px solid var(--gray3);margin-bottom:1rem}
+.res-tab{padding:9px 18px;font-size:12px;font-weight:500;cursor:pointer;color:var(--gray4);border-bottom:2px solid transparent;transition:all .15s}
+.res-tab.on{color:var(--blue);border-bottom-color:var(--blue)}
+.res-tab-pane{display:none}
+.res-tab-pane.on{display:block}
+.cl-sec{margin-bottom:10px}
+.cl-shdr{padding:8px 14px;border-radius:6px 6px 0 0;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px}
+.sh9{background:var(--coral-light);color:var(--coral);border:0.5px solid var(--coral-mid)}
+.sh22{background:var(--blue-light);color:#0C447C;border:0.5px solid #B5D4F4}
+.cl-items{border:0.5px solid var(--gray3);border-top:none;border-radius:0 0 6px 6px;overflow:hidden}
+.cl-item{padding:10px 14px;border-bottom:0.5px solid #eee;display:flex;align-items:flex-start;gap:10px;background:#fff;transition:background .1s}
+.cl-item:last-child{border-bottom:none}
+.cl-item:hover{background:#fafafa}
+.cl-item.done{background:var(--green-soft)}
+.chk{width:16px;height:16px;border:1.5px solid var(--gray3);border-radius:3px;flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.chk.on{background:var(--blue);border-color:var(--blue)}
+.chk.on::after{content:'';width:8px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px);display:block}
+.iq{font-size:12px;color:#333;line-height:1.6}
+.idept{font-size:10px;color:var(--gray4);margin-bottom:2px}
+.iref{font-size:10px;color:var(--gray4);margin-top:2px}
+.ihint{font-size:10px;color:var(--blue);margin-top:4px;background:var(--blue-light);padding:4px 7px;border-radius:4px;line-height:1.5}
+.ievidence{font-size:10px;color:var(--teal);margin-top:3px;background:var(--teal-light);padding:3px 7px;border-radius:4px}
+.prog-bar{background:#eee;border-radius:100px;height:5px;margin:6px 0 3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--blue);border-radius:100px;transition:width .3s}
+.prog-txt{font-size:11px;color:var(--gray4)}
+.res-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+
+/* ── ERROR ── */
+.err{background:var(--red-soft);border:0.5px solid var(--red-mid);border-radius:6px;padding:10px 14px;color:var(--red-text);font-size:12px;margin-top:.75rem;line-height:1.6}
+
+/* ── BADGE ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;margin:2px 2px 2px 0}
+.b-coral{background:var(--coral-light);color:var(--coral)}
+.b-blue{background:var(--blue-light);color:#0C447C}
+.b-teal{background:var(--teal-light);color:#085041}
+.b-gold{background:var(--gold-light);color:var(--gold)}
+.b-gray{background:var(--gray2);color:var(--gray5)}
+
+/* ── HISTORY PANEL ── */
+.yr-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:1rem}
+.yr-tab{padding:6px 14px;border:1px solid var(--gray3);border-radius:100px;font-size:11px;cursor:pointer;background:#fff;color:var(--gray5);transition:all .15s;font-family:'Noto Sans JP',sans-serif}
+.yr-tab:hover{background:var(--gray1)}
+.yr-tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.hist-list{display:flex;flex-direction:column;gap:8px}
+.hist-card{border:1px solid var(--gray3);border-radius:8px;background:#fff;overflow:hidden;transition:box-shadow .15s}
+.hist-card:hover{box-shadow:var(--shadow)}
+.hist-card-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;background:var(--gray1);user-select:none}
+.hist-card-hdr:hover{background:var(--gray2)}
+.hist-info{flex:1}
+.hist-title{font-size:13px;font-weight:500;color:var(--text)}
+.hist-meta{font-size:10px;color:var(--gray4);margin-top:2px}
+.hist-body{display:none;padding:12px 14px;border-top:1px solid var(--gray3)}
+.hist-body.open{display:block}
+.hist-q-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+.hist-q-item{font-size:11px;color:#333;line-height:1.5;padding:5px 8px;border-left:3px solid var(--gray3);background:var(--gray1);border-radius:0 4px 4px 0}
+.hist-q-item.pre{border-color:var(--coral)}
+.hist-q-item.on{border-color:var(--blue)}
+.hist-section-lbl{font-size:10px;font-weight:700;color:var(--gray4);text-transform:uppercase;letter-spacing:.06em;margin:8px 0 4px}
+
+/* ── REPORT PANEL ── */
+.report-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.report-field{display:flex;flex-direction:column;gap:4px}
+.report-field.full{grid-column:1/-1}
+.report-field label{font-size:11px;color:var(--gray5);font-weight:500}
+.report-field textarea{min-height:80px;resize:vertical;line-height:1.6}
+.result-section{margin-bottom:12px}
+.result-section h4{font-size:12px;font-weight:700;color:#fff;padding:6px 12px;border-radius:4px 4px 0 0;margin-bottom:0}
+.result-section .rs-body{border:1px solid var(--gray3);border-top:none;border-radius:0 0 4px 4px;padding:10px 12px;background:#fff}
+.rs-no{background:#D9534F}.rs-minor{background:#E88C3A}.rs-obs{background:#C9920A}.rs-rec{background:#185FA5}.rs-good{background:#0F6E56}
+.rs-textarea{width:100%;border:none;outline:none;font-size:12px;font-family:'Noto Sans JP',sans-serif;color:#333;line-height:1.7;resize:vertical;min-height:60px;background:transparent}
+.rpt-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:3rem 1rem;color:var(--gray4)}
+.empty-icon{font-size:40px;margin-bottom:10px}
+.empty-txt{font-size:13px}
+
+/* ── CONFIRM MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:9999;display:none}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:10px;padding:1.5rem;width:340px;box-shadow:var(--shadow-lg);animation:modalIn .18s ease}
+@keyframes modalIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.modal h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px}
+.modal p{font-size:12px;color:var(--gray5);line-height:1.7;margin-bottom:16px}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+
+/* ── VERSION TOGGLE ── */
+.ver-toggle{display:flex;gap:4px;margin-top:6px}
+.ver-btn{padding:3px 10px;border-radius:100px;font-size:10px;font-weight:500;cursor:pointer;border:1.5px solid var(--gray3);background:#fff;color:var(--gray5);transition:all .15s;font-family:'Noto Sans JP',sans-serif}
+.ver-btn.on9{border-color:var(--coral);background:var(--coral-light);color:var(--coral)}
+.ver-btn.on22{border-color:var(--blue);background:var(--blue-light);color:#0C447C}
+.ver-note{font-size:10px;color:var(--gold);background:var(--gold-light);border-radius:4px;padding:3px 8px;margin-top:4px;display:none}
+.ver-note.show{display:block}
+
+/* ── API ROW ── */
+.api-row{display:flex;gap:8px;align-items:center}
+.api-row input{flex:1;font-size:12px;font-family:'IBM Plex Mono',monospace;padding:7px 10px}
+.api-row select{width:220px;font-size:12px;padding:7px 8px;border:1px solid var(--gray3);border-radius:5px;outline:none;font-family:'Noto Sans JP',sans-serif}
+
+/* ── REPORT CARD ── */
+.rpt-card{border:1px solid var(--gray3);border-radius:8px;overflow:hidden;margin-bottom:8px;background:#fff}
+.rpt-card-hdr{padding:10px 14px;background:var(--gray1);display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.rpt-card-hdr:hover{background:var(--gray2)}
+.rpt-card-body{display:none;padding:14px}
+.rpt-card-body.open{display:block}
+
+/* ── FINDING TABLE ── */
+.finding-section{margin-bottom:14px}
+.finding-section-hdr{display:flex;align-items:center;padding:7px 12px;border-radius:5px 5px 0 0;font-size:12px;font-weight:600;color:#fff}
+.finding-section-body{border:1px solid var(--gray3);border-top:none;border-radius:0 0 5px 5px;overflow:hidden;background:#fff}
+.finding-table{width:100%;border-collapse:collapse;font-size:12px}
+.finding-table th{background:var(--gray2);padding:6px 8px;font-size:10px;font-weight:700;color:var(--gray5);border:1px solid var(--gray3);text-align:center;white-space:nowrap}
+.finding-table td{border:1px solid var(--gray3);padding:3px 5px;vertical-align:top}
+.finding-table td input,.finding-table td textarea{border:none;outline:none;width:100%;font-family:'Noto Sans JP',sans-serif;font-size:11px;background:transparent;resize:none;line-height:1.6;padding:2px 3px}
+.finding-table td textarea{min-height:48px}
+.finding-table tbody tr:hover td{background:#fafafa}
+.del-cell{width:28px;text-align:center}
+.del-row-btn{background:none;border:none;cursor:pointer;color:var(--gray4);font-size:15px;line-height:1;border-radius:3px;padding:2px 3px}
+.del-row-btn:hover{color:var(--coral);background:var(--coral-light)}
+.add-row-btn{width:100%;padding:6px;font-size:11px;color:var(--blue);background:none;border:1px dashed var(--blue);cursor:pointer;font-family:'Noto Sans JP',sans-serif;border-radius:0 0 5px 5px}
+.add-row-btn:hover{background:var(--blue-light)}
+
+/* ── USER MANAGEMENT ── */
+.user-table{width:100%;border-collapse:collapse;font-size:12px}
+.user-table th{background:var(--navy);color:#fff;padding:8px 10px;font-size:11px;text-align:left}
+.user-table td{padding:8px 10px;border-bottom:1px solid var(--gray3);vertical-align:middle}
+.user-table tr:hover td{background:var(--gray1)}
+.role-badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600}
+.role-admin{background:#FEE2E2;color:#991B1B}
+.role-user{background:var(--blue-light);color:#0C447C}
+.status-active{color:var(--teal);font-size:11px}
+.status-disabled{color:var(--gray4);font-size:11px}
+.add-user-form{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end;margin-top:12px;padding-top:12px;border-top:1px solid var(--gray3)}
+.add-user-form .field label{font-size:10px;color:var(--gray5);margin-bottom:3px;display:block}
+
+/* ── DEPT SETTINGS ── */
+.dept-setting-grp{margin-bottom:1rem;border:1px solid var(--gray3);border-radius:8px;overflow:hidden}
+.dept-setting-grp-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--navy);color:#fff}
+.dept-setting-grp-title{font-size:13px;font-weight:600}
+.dept-setting-grp-actions{display:flex;gap:6px}
+.dept-setting-item{border-bottom:1px solid var(--gray3);padding:12px 14px;background:#fff}
+.dept-setting-item:last-child{border-bottom:none}
+.dept-item-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.dept-item-label{font-size:13px;font-weight:500;color:var(--text)}
+.dept-field{margin-bottom:6px}
+.dept-field label{font-size:10px;color:var(--gray5);font-weight:700;display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+.dept-field textarea{width:100%;min-height:52px;resize:vertical;font-size:12px;line-height:1.6;padding:6px 8px;border:1px solid var(--gray3);border-radius:5px;outline:none;font-family:'Noto Sans JP',sans-serif;transition:border .15s}
+.dept-field textarea:focus{border-color:var(--blue)}
+.dept-modified-badge{font-size:9px;color:var(--teal);background:var(--teal-light);padding:1px 7px;border-radius:100px;margin-left:6px}
+.sub-section-hdr{font-size:11px;font-weight:700;color:var(--gray5);text-transform:uppercase;letter-spacing:.06em;padding:7px 14px 5px;background:var(--gray1);border-bottom:1px solid var(--gray3)}
+.dept-add-form{padding:12px 14px;background:var(--gray1);border-top:1px dashed var(--gray3)}
+
+/* ── MINUTES MODAL ── */
+.minutes-modal{width:900px;max-width:97vw;max-height:95vh;overflow-y:auto}
+.minutes-tabs{display:flex;border-bottom:2px solid var(--gray3);margin-bottom:16px}
+.minutes-tab{padding:9px 20px;font-size:13px;font-weight:500;cursor:pointer;color:var(--gray5);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:'Noto Sans JP',sans-serif;background:none;border-top:none;border-left:none;border-right:none}
+.minutes-tab:hover{color:var(--navy)}
+.minutes-tab.on{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+.minutes-tab-pane{display:none}
+.minutes-tab-pane.on{display:block}
+.rec-area{border:2px dashed var(--gray3);border-radius:10px;padding:2rem;text-align:center;transition:all .2s}
+.rec-area.recording{border-color:var(--coral);background:var(--coral-light)}
+.rec-pulse{width:18px;height:18px;background:var(--coral);border-radius:50%;display:inline-block;animation:recPulse 1s ease-in-out infinite}
+@keyframes recPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}
+.rec-timer{font-size:28px;font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--coral);margin:8px 0}
+.transcript-box{background:var(--gray1);border:1px solid var(--gray3);border-radius:8px;padding:12px;min-height:120px;max-height:220px;overflow-y:auto;font-size:12px;line-height:1.8;color:var(--text);margin-top:12px;white-space:pre-wrap}
+.ai-result-card{border:1px solid var(--gray3);border-radius:8px;overflow:hidden;margin-bottom:8px}
+.ai-result-card-hdr{padding:8px 14px;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:space-between}
+.ai-result-card-body{padding:10px 14px}
+.ai-clause-tag{font-size:11px;font-weight:600;color:var(--navy);background:var(--blue-light);padding:3px 8px;border-radius:4px;white-space:nowrap}
+.check-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--gray3)}
+.check-row:last-child{border-bottom:none}
+.check-row input[type=checkbox]{margin-top:3px;width:15px;height:15px;flex-shrink:0;cursor:pointer}
+.check-row-content{flex:1}
+.ai-loading-area{text-align:center;padding:2rem;color:var(--gray5)}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div style="font-size:40px">🧺</div>
+      <h1>ISO内部監査システム</h1>
+      <p>クリーニング業 ISO 9001 / ISO 22301 対応</p>
+    </div>
+    <div class="login-field">
+      <label>ログインID</label>
+      <input type="text" id="login-id" placeholder="IDを入力" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>パスワード</label>
+      <input type="password" id="login-pw" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">ログイン</button>
+    <div id="login-err" style="display:none" class="login-err"></div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div class="app" id="main-app" style="display:none">
+<div class="hdr">
+  <div class="hdr-left">
+    <h1>🧺 クリーニング業 ISO内部監査システム</h1>
+    <p>ISO 9001 / ISO 22301 対応　— 質問生成・履歴管理・監査報告書作成 — Groq API（高速）</p>
+  </div>
+  <div class="hdr-right">
+    <span class="user-badge" id="user-badge">👤 </span>
+    <button class="btn btn-ghost btn-sm" onclick="doLogout()">ログアウト</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn on" id="nav-gen" onclick="switchPage('gen')"><span class="nb">⚡</span>質問生成</button>
+  <button class="nav-btn" id="nav-hist" onclick="switchPage('hist')"><span class="nb">📋</span>履歴・質問確認</button>
+  <button class="nav-btn" id="nav-report" onclick="switchPage('report')"><span class="nb">📝</span>監査報告書作成</button>
+  <button class="nav-btn" id="nav-admin" onclick="switchPage('admin')" style="display:none"><span class="nb">⚙️</span>ユーザー管理</button>
+  <button class="nav-btn" id="nav-deptset" onclick="switchPage('deptset')" style="display:none"><span class="nb">🏭</span>部門設定</button>
+</div>
+
+<!-- ===== PAGE: GEN ===== -->
+<div id="page-gen">
+  <div id="cfg">
+    <div class="card">
+      <div class="slbl">Groq API 設定</div>
+      <div class="api-row">
+        <input type="password" id="apikey" placeholder="Groq APIキーを入力（console.groq.com で取得）" oninput="saveApiKey()">
+        <select id="model-sel" onchange="saveApiKey()">
+          <option value="llama-3.3-70b-versatile">Llama 3.3 70B（高精度・推奨）</option>
+          <option value="llama-3.1-8b-instant">Llama 3.1 8B（最速・低コスト）</option>
+          <option value="meta-llama/llama-4-scout-17b-16e-instruct">Llama 4 Scout 17B</option>
+          <option value="qwen/qwen3-32b">Qwen3 32B</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+        <div style="font-size:11px;color:var(--gray4)">※ <a href="https://console.groq.com" target="_blank" style="color:var(--blue)">console.groq.com</a> でAPIキーを取得できます</div>
+        <div id="apikey-saved-badge" style="display:none;font-size:10px;color:var(--teal);background:var(--teal-light);padding:2px 8px;border-radius:100px">💾 保存済み</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="slbl">監査基本情報</div>
+      <div class="info-row" style="grid-template-columns:1fr 1fr">
+        <div><div class="info-lbl">監査番号</div><input type="text" id="audit-no" value="AU-2026-001"></div>
+        <div><div class="info-lbl">監査日</div><input type="date" id="audit-date"></div>
+      </div>
+      <div style="margin-top:8px">
+        <div class="info-lbl">内部監査員（複数可）</div>
+        <div id="auditor-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;min-height:28px"></div>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="auditor-input" placeholder="氏名を入力してEnterで追加" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addAuditorChip();}">
+          <button class="btn btn-ghost btn-sm" onclick="addAuditorChip()">＋ 追加</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="slbl">対象規格（複数可）</div>
+      <div class="std-row">
+        <div style="flex:1">
+          <button class="std-btn on" onclick="toggleStd('9001')" id="s9001" style="width:100%"><div class="sc">ISO 9001</div><div class="sn">品質マネジメントシステム</div></button>
+          <div class="ver-toggle" id="ver-row-9001">
+            <button class="ver-btn on9" id="ver9001-2015" onclick="setVersion('9001','2015')">2015年版</button>
+            <button class="ver-btn" id="ver9001-2026" onclick="setVersion('9001','2026')">2026年版（移行中）</button>
+          </div>
+          <div class="ver-note" id="ver-note-9001">⚠️ 2026年版に基づいた質問を生成します</div>
+        </div>
+        <div style="flex:1">
+          <button class="std-btn on" onclick="toggleStd('22301')" id="s22301" style="width:100%"><div class="sc">ISO 22301</div><div class="sn">事業継続マネジメントシステム</div></button>
+          <div style="font-size:10px;color:var(--gray4);margin-top:5px;padding:3px 6px;background:var(--gray1);border-radius:4px">現行版：2019年版（改定草案CD進行中・正式発行待ち）</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="slbl">監査対象の部署・工場・課（複数可）</div>
+      <div class="dept-tree" id="dept-tree"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn btn-ghost btn-sm" onclick="selAllDepts(true)">すべて選択</button>
+        <button class="btn btn-ghost btn-sm" onclick="selAllDepts(false)">すべて解除</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="slbl">第4項〜第10項の生成問数設定</div>
+      <div class="clause-grid" id="clause-grid"></div>
+    </div>
+    <div class="card">
+      <div class="slbl">質問の表現レベル</div>
+      <div class="lvl-grid">
+        <button class="lvl-btn" onclick="selLvl('elementary')" id="lvl-elementary"><span class="lvl-icon">🎒</span><span class="lvl-name">小学生レベル</span><div class="lvl-sub">やさしい言葉で<br>わかりやすく</div></button>
+        <button class="lvl-btn on" onclick="selLvl('business')" id="lvl-business"><span class="lvl-icon">💼</span><span class="lvl-name">ビジネスレベル</span><div class="lvl-sub">実務担当者向け<br>標準的な表現</div></button>
+        <button class="lvl-btn" onclick="selLvl('expert')" id="lvl-expert"><span class="lvl-icon">🎓</span><span class="lvl-name">専門家レベル</span><div class="lvl-sub">審査員・コンサル<br>向け詳細表現</div></button>
+      </div>
+    </div>
+    <button class="gen-btn btn-primary" id="gen-btn" onclick="generate()">⚡ チェックリストを生成する（Groq AIが自動作成）</button>
+  </div>
+  <div id="loading" style="display:none"><div class="loading"><div class="spinner"></div><p id="lmsg">Groq AIが生成中...</p></div></div>
+  <div id="result" style="display:none"></div>
+  <div id="errmsg"></div>
+</div>
+
+<!-- ===== PAGE: HISTORY ===== -->
+<div id="page-hist" style="display:none">
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="slbl" style="margin:0">年度で絞り込み</div>
+      <button class="btn btn-ghost btn-sm" onclick="loadHistory()">🔄 更新</button>
+    </div>
+    <div class="yr-tabs" id="yr-tabs"><div class="yr-tab on" data-yr="all" onclick="filterByYear('all')">すべて</div></div>
+  </div>
+  <div id="hist-list"><div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">まだ保存された履歴がありません<br>質問を生成すると自動的に保存されます</div></div></div>
+</div>
+
+<!-- ===== PAGE: REPORT ===== -->
+<div id="page-report" style="display:none">
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="slbl" style="margin:0">保存済み監査報告書</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-gold btn-sm" onclick="openMinutesModal()">🎙️ 議事録AI分析</button>
+        <button class="btn btn-teal btn-sm" onclick="openNewReport()">＋ 新規報告書作成</button>
+      </div>
+    </div>
+    <div class="yr-tabs" id="rpt-yr-tabs"><div class="yr-tab on" data-yr="all" onclick="filterReportByYear('all')">すべて</div></div>
+  </div>
+  <div id="rpt-list"><div class="empty"><div class="empty-icon">📝</div><div class="empty-txt">まだ監査報告書がありません<br>「新規報告書作成」から作成できます</div></div></div>
+</div>
+
+<!-- ===== PAGE: ADMIN ===== -->
+<div id="page-admin" style="display:none">
+  <div class="card">
+    <div class="slbl">ユーザー管理</div>
+    <div id="user-list-wrap">
+      <div class="loading"><div class="spinner"></div><p>読み込み中...</p></div>
+    </div>
+    <!-- 新規ユーザー追加フォーム -->
+    <div class="add-user-form" id="add-user-form">
+      <div class="field"><label>ログインID</label><input type="text" id="new-uid" placeholder="例: yamada"></div>
+      <div class="field"><label>氏名</label><input type="text" id="new-name" placeholder="例: 山田 太郎"></div>
+      <div class="field"><label>パスワード</label><input type="password" id="new-pw" placeholder="パスワード"></div>
+      <div class="field"><label>権限</label>
+        <select id="new-role">
+          <option value="user">一般ユーザー</option>
+          <option value="admin">管理者</option>
+        </select>
+      </div>
+      <div class="field"><label>&nbsp;</label><button class="btn btn-navy btn-sm" onclick="addUser()" style="white-space:nowrap">＋ 追加</button></div>
+    </div>
+    <div id="add-user-err" style="display:none" class="err"></div>
+  </div>
+</div>
+
+<!-- ===== REPORT EDITOR MODAL ===== -->
+<div class="modal-overlay" id="report-editor-overlay">
+  <div class="modal" style="width:860px;max-width:97vw;max-height:93vh;overflow-y:auto">
+    <h3 id="rpt-editor-title">📝 監査報告書 作成・編集</h3>
+    <p style="margin-bottom:12px;color:var(--gray5);font-size:11px">各カテゴリに複数の指摘事項を追加できます。「＋ 行を追加」で項目を増やせます。</p>
+    <div class="rpt-info-grid">
+      <div><div class="info-lbl">監査番号</div><input type="text" id="rpt-no"></div>
+      <div><div class="info-lbl">監査日</div><input type="date" id="rpt-date"></div>
+      <div><div class="info-lbl">年度</div><input type="text" id="rpt-fy" placeholder="例: 2025"></div>
+      <div><div class="info-lbl">監査対象部署</div><input type="text" id="rpt-dept"></div>
+      <div><div class="info-lbl">対象規格</div><input type="text" id="rpt-std" placeholder="ISO 9001 / ISO 22301"></div>
+      <div style="grid-column:1/-1">
+        <div class="info-lbl">内部監査員（複数可）</div>
+        <div id="rpt-auditor-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px;min-height:26px"></div>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="rpt-auditor-input" placeholder="氏名を入力してEnterで追加" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter'){event.preventDefault();addRptAuditorChip();}">
+          <button class="btn btn-ghost btn-sm" onclick="addRptAuditorChip()">＋ 追加</button>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div class="info-lbl" style="margin-bottom:6px">参照チェックリスト</div>
+      <select id="rpt-ref-checklist" style="width:100%;font-size:12px;padding:7px 10px">
+        <option value="">-- 参照なし（手動入力）--</option>
+      </select>
+    </div>
+    <div id="rpt-sections-wrap"></div>
+    <div class="result-section" style="margin-bottom:0">
+      <h4 style="background:var(--navy)">⑥ 総合評価・監査員コメント</h4>
+      <div class="rs-body"><textarea class="rs-textarea" id="rpt-comment" placeholder="総合的な評価コメントを記入..." style="min-height:70px"></textarea></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="closeReportEditor()">キャンセル</button>
+      <button class="btn btn-teal btn-sm" onclick="saveReport()">💾 保存</button>
+      <button class="btn btn-gold btn-sm" onclick="exportReportExcel()">📊 Excel出力</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: DEPT SETTINGS ===== -->
+<div id="page-deptset" style="display:none">
+  <div class="card" style="margin-bottom:.75rem">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div class="slbl" style="margin-bottom:4px">部門・工場 設定</div>
+        <div style="font-size:11px;color:var(--gray5);line-height:1.7">各部門・工場の業務内容・監査着眼点・リスクを編集できます。<br>ここで設定した情報をAIが参照してチェックリストを作成します。</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="resetDeptMaster()">↩ 初期値に戻す</button>
+        <button class="btn btn-teal btn-sm" onclick="saveDeptMaster()">💾 保存する</button>
+      </div>
+    </div>
+    <div id="dept-save-msg" style="display:none;margin-top:8px;font-size:11px;color:var(--teal);background:var(--teal-light);padding:6px 12px;border-radius:6px">✅ 保存しました</div>
+  </div>
+  <div id="dept-settings-wrap"></div>
+</div>
+
+<!-- ===== MINUTES MODAL ===== -->
+<div class="modal-overlay" id="minutes-modal-overlay">
+  <div class="modal minutes-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <h3>🎙️ 議事録AI分析 → 報告書自動反映</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeMinutesModal()">✕ 閉じる</button>
+    </div>
+    <p style="font-size:11px;color:var(--gray5);margin-bottom:12px">テキスト貼り付けまたは音声録音で議事録を入力。AIが規格番号・指摘区分に自動振り分けします。</p>
+    <div class="minutes-tabs">
+      <button class="minutes-tab on" id="mtab-text" onclick="switchMinutesTab('text')">📝 テキスト入力</button>
+      <button class="minutes-tab" id="mtab-voice" onclick="switchMinutesTab('voice')">🎙️ 音声録音</button>
+    </div>
+    <!-- テキスト入力 -->
+    <div class="minutes-tab-pane on" id="mpane-text">
+      <div style="font-size:11px;color:var(--gray5);margin-bottom:6px">議事録・メモをそのまま貼り付けてください。話し言葉・箇条書きでもOKです。</div>
+      <textarea id="minutes-text-input" placeholder="例）&#10;・岸の丘工場にて洗浄温度記録の記入漏れが3件確認された。&#10;・集配部では汚染物と清潔品の積み合わせ防止の周知が不十分。&#10;・りんくう第1工場の感染性リネン管理は手順書・動線ともに適切で良好。&#10;・人事部の教育訓練計画は整備されているが2名の受講記録が未記入。" style="width:100%;min-height:180px;resize:vertical;font-size:12px;line-height:1.8;padding:10px;border:1.5px solid var(--gray3);border-radius:8px;outline:none;font-family:'Noto Sans JP',sans-serif"></textarea>
+      <div style="margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div>
+          <div style="font-size:11px;color:var(--gray5);margin-bottom:4px">振り分け対象の規格</div>
+          <div style="display:flex;gap:10px">
+            <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="min-std-9001" checked style="width:14px;height:14px"> ISO 9001</label>
+            <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="min-std-22301" checked style="width:14px;height:14px"> ISO 22301</label>
+          </div>
+        </div>
+        <button class="btn btn-navy btn-sm" style="margin-left:auto" onclick="runMinutesAI('text')">🤖 AI分析を実行</button>
+      </div>
+    </div>
+    <!-- 音声録音 -->
+    <div class="minutes-tab-pane" id="mpane-voice">
+      <div class="rec-area" id="rec-area">
+        <div id="rec-idle">
+          <div style="font-size:36px;margin-bottom:8px">🎙️</div>
+          <div style="font-size:13px;font-weight:500;color:var(--navy);margin-bottom:4px">音声録音で議事録を作成</div>
+          <div style="font-size:11px;color:var(--gray5);margin-bottom:16px">ブラウザのマイクを使ってリアルタイム文字起こし（Chrome/Edge対応）</div>
+          <button class="btn btn-coral btn-sm" onclick="startRecording()">● 録音開始</button>
+        </div>
+        <div id="rec-active" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px">
+            <span class="rec-pulse"></span>
+            <span style="font-size:13px;font-weight:600;color:var(--coral)">録音中</span>
+          </div>
+          <div class="rec-timer" id="rec-timer">00:00</div>
+          <button class="btn btn-ghost btn-sm" onclick="stopRecording()">■ 録音停止</button>
+        </div>
+      </div>
+      <div id="voice-transcript-wrap" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;margin-bottom:4px">
+          <div style="font-size:11px;font-weight:600;color:var(--gray5)">文字起こし結果（編集可）</div>
+          <button class="btn btn-ghost btn-xs" onclick="clearTranscript()">クリア</button>
+        </div>
+        <div class="transcript-box" id="transcript-box" contenteditable="true"></div>
+        <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-navy btn-sm" onclick="runMinutesAI('voice')">🤖 AI分析を実行</button>
+        </div>
+      </div>
+    </div>
+    <!-- ローディング -->
+    <div id="min-loading" style="display:none" class="ai-loading-area">
+      <div class="spinner" style="margin:0 auto 12px"></div>
+      <div style="font-size:13px;font-weight:500">AIが議事録を分析中...</div>
+      <div style="font-size:11px;color:var(--gray4);margin-top:4px">規格番号の特定・指摘区分の振り分けを行っています</div>
+    </div>
+    <!-- 分析結果 -->
+    <div id="min-result" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:var(--navy)">✅ AI分析結果 — 報告書に反映する項目を選択</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-xs" onclick="toggleAllMinResults(true)">全選択</button>
+          <button class="btn btn-ghost btn-xs" onclick="toggleAllMinResults(false)">全解除</button>
+        </div>
+      </div>
+      <div id="min-result-body"></div>
+      <div style="background:var(--gold-light);border:1px solid #e6c84a;border-radius:6px;padding:8px 12px;font-size:11px;color:#7a5a00;margin-top:8px">
+        ⚠️ AI分析結果は自動生成です。内容を必ず確認の上、報告書に反映してください。
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+        <button class="btn btn-ghost btn-sm" onclick="closeMinutesModal()">キャンセル</button>
+        <button class="btn btn-teal btn-sm" onclick="applyMinutesToReport()">📝 選択項目を報告書に反映</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <h3 id="confirm-title">確認</h3>
+    <p id="confirm-msg"></p>
+    <div class="modal-btns">
+      <button class="btn btn-ghost btn-sm" onclick="closeConfirm()">キャンセル</button>
+      <button class="btn btn-coral btn-sm" id="confirm-ok">削除する</button>
+    </div>
+  </div>
+</div>
+</div><!-- /main-app -->
+
+<script>
+// ============================
+// GAS URL（固定）
+// ============================
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbw1td0OqjrpfABBt_Msbw-hIQzd8Q-Tl8Rlbb6VjRi1X4Vxn7h85MyBOx_hjONoEquw/exec';
+
+async function gasPost(action, params = {}) {
+  const url = GAS_URL + '?action=' + encodeURIComponent(action)
+            + '&data=' + encodeURIComponent(JSON.stringify(params));
+  const res = await fetch(url);
+  return res.json();
+}
+
+// ============================
+// AUTH STATE
+// ============================
+let currentUser = null; // { id, name, role }
+
+async function doLogin() {
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-err');
+  if (!id || !pw) { showLoginErr('IDとパスワードを入力してください'); return; }
+  btn.disabled = true; btn.textContent = '確認中...';
+  err.style.display = 'none';
+  try {
+    const data = await gasPost('login', { id, password: pw });
+    if (data.ok) {
+      currentUser = { id, name: data.name, role: data.role };
+      sessionStorage.setItem('audit_session', JSON.stringify(currentUser));
+      showMainApp();
+    } else {
+      showLoginErr(data.error || 'ログインに失敗しました');
+    }
+  } catch (e) {
+    showLoginErr('サーバーに接続できませんでした。しばらくしてから再試行してください。');
+  }
+  btn.disabled = false; btn.textContent = 'ログイン';
+}
+
+function showLoginErr(msg) {
+  const el = document.getElementById('login-err');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function doLogout() {
+  currentUser = null;
+  sessionStorage.removeItem('audit_session');
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-id').value = '';
+  document.getElementById('login-pw').value = '';
+}
+
+function showMainApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('user-badge').textContent = '👤 ' + (currentUser.name || currentUser.id);
+  // 管理者タブ表示制御
+  document.getElementById('nav-admin').style.display = currentUser.role === 'admin' ? 'flex' : 'none';
+  document.getElementById('nav-deptset').style.display = currentUser.role === 'admin' ? 'flex' : 'none';
+  loadDeptMaster();
+  openDB().then(() => { loadApiKey(); }).catch(console.error);
+  buildDeptTree(); buildClauseGrid();
+  document.getElementById('audit-date').value = new Date().toISOString().split('T')[0];
+  // ログインユーザーを内部監査員として自動設定
+  const userName = currentUser.name || currentUser.id;
+  if (userName) {
+    auditorList = [userName];
+    renderAuditorChips();
+  }
+}
+
+// セッション復元
+window.addEventListener('load', () => {
+  const saved = sessionStorage.getItem('audit_session');
+  if (saved) {
+    try { currentUser = JSON.parse(saved); showMainApp(); return; } catch(e){}
+  }
+  document.getElementById('login-screen').style.display = 'flex';
+});
+
+// ============================
+// USER MANAGEMENT (Admin)
+// ============================
+async function loadUsers() {
+  const wrap = document.getElementById('user-list-wrap');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div><p>読み込み中...</p></div>';
+  try {
+    const data = await gasPost('getUsers', { requesterId: currentUser.id });
+    if (data.error) { wrap.innerHTML = `<div class="err">${data.error}</div>`; return; }
+    const users = data.users || [];
+    if (!users.length) { wrap.innerHTML = '<div class="empty"><div class="empty-icon">👤</div><div class="empty-txt">ユーザーがいません</div></div>'; return; }
+    wrap.innerHTML = `<table class="user-table">
+      <thead><tr><th>ID</th><th>氏名</th><th>権限</th><th>状態</th><th></th></tr></thead>
+      <tbody>${users.map(u => `<tr>
+        <td style="font-family:monospace;font-size:11px">${u.id}</td>
+        <td>${u.name || u.id}</td>
+        <td><span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${u.role === 'admin' ? '管理者' : '一般'}</span></td>
+        <td><span class="${u.status === 'active' ? 'status-active' : 'status-disabled'}">${u.status === 'active' ? '✅ 有効' : '⛔ 無効'}</span></td>
+        <td>${u.id !== currentUser.id && u.status === 'active' ? `<button class="btn btn-coral btn-xs" onclick="deleteUser('${u.id}')">無効化</button>` : ''}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  } catch(e) {
+    wrap.innerHTML = '<div class="err">読み込みに失敗しました</div>';
+  }
+}
+
+async function addUser() {
+  const uid = document.getElementById('new-uid').value.trim();
+  const name = document.getElementById('new-name').value.trim();
+  const pw = document.getElementById('new-pw').value;
+  const role = document.getElementById('new-role').value;
+  const errEl = document.getElementById('add-user-err');
+  errEl.style.display = 'none';
+  if (!uid || !pw) { errEl.textContent = 'IDとパスワードは必須です'; errEl.style.display = 'block'; return; }
+  try {
+    const data = await gasPost('addUser', { requesterId: currentUser.id, newId: uid, password: pw, role, name });
+    if (data.error) { errEl.textContent = data.error; errEl.style.display = 'block'; return; }
+    document.getElementById('new-uid').value = '';
+    document.getElementById('new-name').value = '';
+    document.getElementById('new-pw').value = '';
+    loadUsers();
+  } catch(e) {
+    errEl.textContent = 'エラーが発生しました'; errEl.style.display = 'block';
+  }
+}
+
+async function deleteUser(targetId) {
+  if (!confirm(`ユーザー「${targetId}」を無効化しますか？`)) return;
+  const data = await gasPost('deleteUser', { requesterId: currentUser.id, targetId });
+  if (data.error) { alert(data.error); return; }
+  loadUsers();
+}
+
+// ============================
+// STORAGE HELPERS (IndexedDB + GAS)
+// ============================
+const DB_NAME='ISOAuditDB', DB_VER=2;
+let db=null;
+function openDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(DB_NAME,DB_VER);
+    req.onupgradeneeded=e=>{
+      const d=e.target.result;
+      if(!d.objectStoreNames.contains('checklists')) d.createObjectStore('checklists',{keyPath:'id'});
+      if(!d.objectStoreNames.contains('reports')) d.createObjectStore('reports',{keyPath:'id'});
+    };
+    req.onsuccess=e=>{db=e.target.result;res(db);};
+    req.onerror=e=>rej(e);
+  });
+}
+function dbPut(store,obj){return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).put(obj).onsuccess=e=>res(e.target.result);tx.onerror=e=>rej(e);});}
+function dbGetAll(store){return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).getAll();req.onsuccess=e=>res(e.target.result);req.onerror=e=>rej(e);});}
+function dbDelete(store,id){return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).delete(id).onsuccess=()=>res();tx.onerror=e=>rej(e);});}
+
+// GASへのデータ同期
+async function syncToGAS(type, record) {
+  try {
+    await gasPost('saveData', { requesterId: currentUser.id, data: { type, ...record } });
+  } catch(e) { console.warn('GAS sync failed:', e); }
+}
+
+async function loadFromGAS(type) {
+  try {
+    const data = await gasPost('getData', { requesterId: currentUser.id });
+    return (data.records || []).filter(r => r.type === type);
+  } catch(e) { console.warn('GAS load failed:', e); return []; }
+}
+
+// ============================
+// DATA & MASTER
+// ============================
+const MASTER=[
+  {grpKey:'prod',grpLabel:'生産部（工場）',subs:[
+    {subLabel:'工場',items:[
+      {key:'f_kishinooka',label:'岸の丘工場',desc:'大型機械化設備を持つ基幹工場。大型ウォッシャー・タンブラー・プレス機を多数保有し病院・ホテル向け大量リネン処理が中心。',points:'設備点検記録、洗浄温度・時間の管理記録、不適合品の識別・隔離、作業標準書の整備と遵守',risks:'機械故障による大量の納期遅延リスク（BCP要）、洗浄不良による感染リスク'},
+      {key:'f_kishiwada',label:'岸和田工場',desc:'機械化されたクリーニング工場。地域の飲食・ホテル・一般企業向けに多品種対応。',points:'品種別洗浄条件の管理、ロット管理・仕分け精度、納期管理',risks:'多品種対応による仕分けミス・混載リスク'},
+      {key:'f_kumatori',label:'熊取工場',desc:'顧客私物衣類（デリケート素材・ブランド品）のネット洗いが多い工場。',points:'私物衣類の受付時チェック、識別タグ管理、保管場所の分離',risks:'顧客財産の紛失・損傷（高額賠償リスク）'},
+      {key:'f_izumisano',label:'泉佐野工場',desc:'飲食チェーン・レストラン向けユニフォーム・布巾・テーブルクロスを主に処理。',points:'食品関連汚染物の除去確認方法、洗浄剤の適切な選定・使用量管理',risks:'食品由来の衛生リスク、洗浄不足による顧客クレーム'},
+      {key:'f_rinku1',label:'りんくう第１工場',desc:'病院・医療機関向けリネンの大量処理が中心。感染性リネンの分離管理が最重要。',points:'感染性リネンの受付〜洗浄〜仕上げまでの識別・動線管理、洗浄温度・時間の記録',risks:'感染性リネンによる交差汚染・職員感染リスク'},
+      {key:'f_rinku2',label:'りんくう第２工場',desc:'りんくう地区の第２拠点。第１工場の増産対応・新規顧客向け工場。',points:'第１工場との品質基準統一状況、作業標準書の整備状況',risks:'第１工場との品質差異リスク'},
+      {key:'f_curtain',label:'カーテンメンテナンス工場',desc:'カーテン・ブラインドの洗浄・補修・採寸・取付まで一貫対応する専門工場。',points:'採寸情報の工場への正確な伝達方法、補修作業の品質基準',risks:'採寸ミス・仕様誤認による再製作リスク'},
+    ]}
+  ]},
+  {grpKey:'sales',grpLabel:'営業部',subs:[
+    {subLabel:'病院営業',items:[
+      {key:'sh_1',label:'病院営業 1課',desc:'病院向けユニフォームのリース・販売を主目的とする部署。',points:'顧客ごとのユニフォーム仕様書・サイズ表の管理状況、リース契約内容の把握と定期見直し',risks:'サイズ誤りによる納品不適合・クレーム'},
+      {key:'sh_2',label:'病院営業 2課',desc:'入院セットの提供・管理を主目的とする部署。',points:'入院セット内容の標準化と顧客別カスタム仕様の管理',risks:'在庫不足による病院業務停止リスク'},
+    ]},
+    {subLabel:'その他営業',items:[
+      {key:'so_food',label:'外食営業',desc:'レストランチェーン・ホテル向けユニフォーム・クリーニングサービス。',points:'顧客の衛生基準への対応確認、洗浄仕様書の整備',risks:'食品衛生基準不適合によるクレーム'},
+      {key:'so_event',label:'イベントユニフォーム営業',desc:'展示会・式典向けユニフォームの短期レンタル・クリーニング。',points:'イベント日程に合わせた受注〜納品スケジュール管理',risks:'短納期対応失敗による機会損失・クレーム'},
+      {key:'so_curtain',label:'カーテン営業',desc:'オフィスビル・ホテルへのカーテン清掃・メンテナンスサービスを営業。',points:'現地調査記録の正確な工場伝達、見積内容と実施内容の一致確認',risks:'採寸・仕様伝達ミスによる手戻り'},
+    ]}
+  ]},
+  {grpKey:'others',grpLabel:'その他部署',subs:[
+    {subLabel:'現場・物流',items:[
+      {key:'d_delivery',label:'集配部',desc:'ルート配送部門。車両管理・ドライバーの衛生管理・納品確認が主要業務。',points:'集配車両の日常点検記録、汚染物と清潔品の積み合わせ防止措置',risks:'汚染物と清潔品の混載による二次汚染リスク'},
+      {key:'d_hospital',label:'院内派遣',desc:'病院内に常駐し、ユニフォーム・白衣・リネン類を各スタッフのロッカーに仕分け・補充。',points:'院内行動規範の理解と遵守、ロッカー番号・スタッフ氏名と配布物の正確な照合',risks:'配布ミスによる個人情報・プライバシー問題'},
+      {key:'d_uniform',label:'ユニフォーム供給',desc:'企業顧客向けユニフォームの保管倉庫・在庫管理・サイズ交換対応。',points:'在庫管理システムと実地棚卸の差異確認、入出庫記録の完全性',risks:'在庫不足による供給遅延'},
+    ]},
+    {subLabel:'管理部門',items:[
+      {key:'d_accounting',label:'経理部',desc:'顧客への請求・支払処理・原価管理・財務報告を担う部門。',points:'請求書発行・入金消込のプロセスと承認フロー、財務記録のバックアップ',risks:'請求漏れ・二重請求による顧客トラブル'},
+      {key:'d_hr',label:'人事部',desc:'採用・労務管理・給与計算・教育訓練・安全衛生を担う部門。',points:'全スタッフの教育訓練計画と実施記録の整備状況、力量評価の記録',risks:'未教育スタッフによる品質不適合・事故リスク'},
+      {key:'d_it',label:'情報システム部',desc:'基幹業務システム・ネットワーク・セキュリティの管理・運用・保守を担うIT部門。',points:'システムバックアップの実施状況と復旧テスト記録、アクセス権限管理',risks:'基幹システム障害による全社業務停止'},
+      {key:'d_admin',label:'事務部門',desc:'受注処理・伝票作成・書類管理を行う総務・事務部門。',points:'受注データの入力精度と二重チェックの仕組み、書類の保管・廃棄ルール',risks:'受注ミスによる納品不適合'},
+    ]}
+  ]}
+];
+
+const CLAUSES=[
+  {std:'ISO 9001',no:'4',name:'組織の状況'},{std:'ISO 9001',no:'5',name:'リーダーシップ'},{std:'ISO 9001',no:'6',name:'計画'},{std:'ISO 9001',no:'7',name:'支援'},{std:'ISO 9001',no:'8',name:'運用'},{std:'ISO 9001',no:'9',name:'パフォーマンス評価'},{std:'ISO 9001',no:'10',name:'改善'},
+  {std:'ISO 22301',no:'4',name:'組織の状況'},{std:'ISO 22301',no:'5',name:'リーダーシップ'},{std:'ISO 22301',no:'6',name:'計画'},{std:'ISO 22301',no:'7',name:'支援'},{std:'ISO 22301',no:'8',name:'運用'},{std:'ISO 22301',no:'9',name:'パフォーマンス評価'},{std:'ISO 22301',no:'10',name:'改善'},
+];
+
+// ============================
+// STATE
+// ============================
+let selectedStds=new Set(['9001','22301']),selectedDepts=new Set(),selectedLevel='business';
+// バージョン管理: デフォルトは現行版
+const STD_VERSIONS = { '9001': '2015', '22301': '2019' };
+const STD_CURRENT  = { '9001': '2015', '22301': '2019' };
+const STD_NEXT     = { '9001': '2026' }; // 22301は改定未発行のため除外
+let checkStates={},preItems=[],onItems=[],preSections=[],onSections=[];
+let currentPage='gen';
+let editingReportId=null;
+
+// ============================
+// API KEY PERSISTENCE
+// ============================
+function saveApiKey(){
+  const key=document.getElementById('apikey').value;
+  const model=document.getElementById('model-sel').value;
+  try{
+    localStorage.setItem('groq_apikey', key);
+    localStorage.setItem('groq_model', model);
+    const badge=document.getElementById('apikey-saved-badge');
+    if(key){ badge.style.display='block'; }
+    else { badge.style.display='none'; }
+  }catch(e){}
+}
+function loadApiKey(){
+  try{
+    const key=localStorage.getItem('groq_apikey')||'';
+    const model=localStorage.getItem('groq_model')||'';
+    if(key){
+      document.getElementById('apikey').value=key;
+      document.getElementById('apikey-saved-badge').style.display='block';
+    }
+    if(model){
+      const sel=document.getElementById('model-sel');
+      for(let o of sel.options){ if(o.value===model){ sel.value=model; break; } }
+    }
+  }catch(e){}
+}
+
+// ============================
+// AUDITOR CHIP MANAGEMENT
+// ============================
+let auditorList = [];
+let rptAuditorList = [];
+
+function renderAuditorChips() {
+  const container = document.getElementById('auditor-chips');
+  if (!container) return;
+  container.innerHTML = auditorList.map((name, i) =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--navy);color:#fff;border-radius:100px;font-size:11px;font-weight:500">👤 ${esc(name)}<button onclick="removeAuditor(${i})" style="background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:13px;line-height:1;padding:0 0 0 2px">×</button></span>`
+  ).join('');
+}
+
+function addAuditorChip() {
+  const input = document.getElementById('auditor-input');
+  const name = input.value.trim();
+  if (!name) return;
+  if (!auditorList.includes(name)) { auditorList.push(name); renderAuditorChips(); }
+  input.value = '';
+}
+
+function removeAuditor(i) {
+  auditorList.splice(i, 1);
+  renderAuditorChips();
+}
+
+function getAuditorString() {
+  return auditorList.join('、');
+}
+
+function renderRptAuditorChips() {
+  const container = document.getElementById('rpt-auditor-chips');
+  if (!container) return;
+  container.innerHTML = rptAuditorList.map((name, i) =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--navy);color:#fff;border-radius:100px;font-size:11px;font-weight:500">👤 ${esc(name)}<button onclick="removeRptAuditor(${i})" style="background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:13px;line-height:1;padding:0 0 0 2px">×</button></span>`
+  ).join('');
+}
+
+function addRptAuditorChip() {
+  const input = document.getElementById('rpt-auditor-input');
+  const name = input.value.trim();
+  if (!name) return;
+  if (!rptAuditorList.includes(name)) { rptAuditorList.push(name); renderRptAuditorChips(); }
+  input.value = '';
+}
+
+function removeRptAuditor(i) {
+  rptAuditorList.splice(i, 1);
+  renderRptAuditorChips();
+}
+
+function getRptAuditorString() {
+  return rptAuditorList.join('、');
+}
+
+// ============================
+// NAVIGATION
+// ============================
+function switchPage(p){
+  ['gen','hist','report','admin','deptset'].forEach(x=>{
+    const el=document.getElementById('page-'+x);
+    if(el) el.style.display=x===p?'block':'none';
+    const nb=document.getElementById('nav-'+x);
+    if(nb) nb.classList.toggle('on',x===p);
+  });
+  currentPage=p;
+  if(p==='hist') loadHistory();
+  if(p==='report') loadReports();
+  if(p==='admin') loadUsers();
+  if(p==='deptset') renderDeptSettings();
+}
+
+// ============================
+// DEPT TREE
+// ============================
+function buildDeptTree(){
+  const tree=document.getElementById('dept-tree'); tree.innerHTML='';
+  MASTER.forEach(grp=>{
+    const div=document.createElement('div'); div.className='grp';
+    div.innerHTML=`<div class="grp-hdr" onclick="toggleGrp('${grp.grpKey}')"><span class="grp-name">${grp.grpLabel}</span><span class="grp-cnt" id="cnt-${grp.grpKey}">0</span><span class="grp-arr" id="arr-${grp.grpKey}">▶</span></div>
+    <div class="grp-body" id="body-${grp.grpKey}">${grp.subs.map(sub=>`<div class="sub-lbl" style="margin-top:6px">${sub.subLabel}</div><div class="chip-row"><button class="chip all-chip" id="all-${grp.grpKey}-${sub.subLabel}" onclick="toggleSubAll('${grp.grpKey}','${sub.subLabel}')">すべて</button>${sub.items.map(item=>`<button class="chip" id="chip-${item.key}" onclick="toggleChip('${item.key}','${grp.grpKey}','${sub.subLabel}')">${item.label}</button>`).join('')}</div>`).join('')}</div>`;
+    tree.appendChild(div);
+  });
+}
+function toggleGrp(k){document.getElementById('body-'+k).classList.toggle('open');document.getElementById('arr-'+k).classList.toggle('open');}
+function toggleChip(key,grpKey,subLabel){selectedDepts.has(key)?selectedDepts.delete(key):selectedDepts.add(key);document.getElementById('chip-'+key).classList.toggle('on');updateSubAll(grpKey,subLabel);updateGrpCount(grpKey);}
+function toggleSubAll(grpKey,subLabel){const grp=MASTER.find(g=>g.grpKey===grpKey);const sub=grp.subs.find(s=>s.subLabel===subLabel);const allOn=sub.items.every(i=>selectedDepts.has(i.key));sub.items.forEach(i=>{allOn?selectedDepts.delete(i.key):selectedDepts.add(i.key);document.getElementById('chip-'+i.key).classList.toggle('on',!allOn);});updateSubAll(grpKey,subLabel);updateGrpCount(grpKey);}
+function updateSubAll(grpKey,subLabel){const grp=MASTER.find(g=>g.grpKey===grpKey);const sub=grp.subs.find(s=>s.subLabel===subLabel);document.getElementById(`all-${grpKey}-${subLabel}`)?.classList.toggle('on',sub.items.every(i=>selectedDepts.has(i.key)));}
+function updateGrpCount(grpKey){const grp=MASTER.find(g=>g.grpKey===grpKey);let cnt=0;grp.subs.forEach(s=>s.items.forEach(i=>{if(selectedDepts.has(i.key))cnt++;}));document.getElementById('cnt-'+grpKey).textContent=cnt;}
+function selAllDepts(on){MASTER.forEach(grp=>{grp.subs.forEach(sub=>{sub.items.forEach(i=>{on?selectedDepts.add(i.key):selectedDepts.delete(i.key);document.getElementById('chip-'+i.key).classList.toggle('on',on);});updateSubAll(grp.grpKey,sub.subLabel);});updateGrpCount(grp.grpKey);});}
+
+// ============================
+// CLAUSE GRID
+// ============================
+function buildClauseGrid(){
+  const grid=document.getElementById('clause-grid'); grid.innerHTML='';
+  CLAUSES.forEach((c,i)=>{
+    const is9=c.std==='ISO 9001'; const div=document.createElement('div'); div.className=`clause-item ${is9?'iso9':'iso22'}`;
+    div.innerHTML=`<div class="clause-hdr"><span class="clause-tag ${is9?'tag-9':'tag-22'}">${is9?'9001':'22301'}</span><span class="clause-name">第${c.no}項 ${c.name}</span><label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--gray4)"><input type="checkbox" id="en-${i}" checked style="width:12px;height:12px"> 有効</label></div>
+    <div class="clause-counts"><div class="cnt-box"><span class="cnt-lbl">事前確認</span><input type="number" id="pre-${i}" value="${is9?3:2}" min="0" max="10" style="width:44px"></div><div class="cnt-box"><span class="cnt-lbl">当日質問</span><input type="number" id="on-${i}" value="${is9?3:2}" min="0" max="10" style="width:44px"></div></div>`;
+    grid.appendChild(div);
+  });
+}
+function setVersion(std, ver) {
+  STD_VERSIONS[std] = ver;
+  const current = STD_CURRENT[std];
+  const next = STD_NEXT[std];
+  const isNext = ver !== current;
+  // ボタンのスタイル更新
+  const curBtn = document.getElementById(`ver${std}-${current}`);
+  const nxtBtn = document.getElementById(`ver${std}-${next}`);
+  const cls = std === '9001' ? 'on9' : 'on22';
+  if (curBtn) curBtn.classList.toggle(cls, !isNext);
+  if (nxtBtn) nxtBtn.classList.toggle(cls, isNext);
+  // 注意書きの表示制御
+  document.getElementById(`ver-note-${std}`)?.classList.toggle('show', isNext);
+}
+function toggleStd(s){const btn=document.getElementById('s'+s);if(selectedStds.has(s)){if(selectedStds.size>1){selectedStds.delete(s);btn.classList.remove('on');}}else{selectedStds.add(s);btn.classList.add('on');}}
+function selLvl(l){['elementary','business','expert'].forEach(x=>document.getElementById('lvl-'+x).classList.remove('on'));selectedLevel=l;document.getElementById('lvl-'+l).classList.add('on');}
+function getSelectedUnits(){const r=[];MASTER.forEach(grp=>grp.subs.forEach(sub=>sub.items.forEach(item=>{if(selectedDepts.has(item.key))r.push(item);})));return r;}
+function getClauseConfigs(type){const lines=[];CLAUSES.forEach((c,i)=>{if(!document.getElementById('en-'+i).checked)return;if(!selectedStds.has(c.std.replace('ISO ','')))return;const cnt=parseInt(document.getElementById(type+'-'+i).value)||0;if(cnt>0)lines.push(`  ${c.std} 第${c.no}項「${c.name}」: ${cnt}問`);});return lines.join('\n');}
+function getLevelDesc(){return {elementary:'小学生でもわかるやさしい言葉',business:'実務担当者向けのビジネス表現（標準的なISO用語を使いつつ現場がわかる表現）',expert:'ISO審査員・品質コンサルタント向けの専門的表現（規格要求事項の文言に近い厳密な表現）'}[selectedLevel];}
+function getStdVersionLabel(stdNo) {
+  const ver = STD_VERSIONS[stdNo];
+  const cur = STD_CURRENT[stdNo];
+  if (ver !== cur) return `ISO ${stdNo}:${ver}（移行期：現行${cur}版から${ver}版への移行中）`;
+  return `ISO ${stdNo}:${ver}`;
+}
+function buildCommonCtx(units){let s=`【業種】クリーニング業（リネンサプライ・ユニフォームサービス・院内派遣・カーテンメンテナンスを含む）\n【対象規格】${[...selectedStds].map(x=>getStdVersionLabel(x)).join('と')}\n`;
+// 移行期の追加指示
+const transStds=[...selectedStds].filter(x=>STD_VERSIONS[x]!==STD_CURRENT[x]);
+if(transStds.length>0){s+=`【規格移行期の留意点】${transStds.map(x=>`ISO ${x}は${STD_CURRENT[x]}年版から${STD_NEXT[x]}年版への移行期にあります。現行版の要求事項を遵守しつつ、${STD_NEXT[x]}年版の新要求事項・変更点（例：気候変動リスクへの対応、DX関連の情報技術管理強化、サプライチェーンレジリエンス等）も踏まえた質問を含めること。`).join(' ')}\n`;}
+s+=`【表現レベル】${getLevelDesc()}\n\n【監査対象部署・工場・課の詳細】\n`;units.forEach(u=>{s+=`◆ ${u.label}\n  業務内容: ${u.desc}\n  主要な監査着眼点: ${u.points}\n  ISO観点のリスク: ${u.risks}\n\n`;});return s;}
+const JSON_FMT=`\n【出力形式】必ず以下のJSON形式のみで返答。説明文・\`\`\`は不要。\n{"sections":[{"standard":"ISO 9001","clause":"条項番号","title":"セクション名","items":[{"id":"一意ID","target":"対象工場・部署名","question":"質問文","reference":"ISO §番号","hint":"監査員へのヒント（1〜2文）","evidence":"確認すべき書類・証憑名"}]}]}`;
+function buildPrePrompt(units){return `あなたはクリーニング業のISO内部監査の専門家です。【事前確認質問】のチェックリストを作成してください。\n【事前確認質問とは】監査の1〜2週間前に被監査部門へ送付し書面・記録類・手順書を事前準備してもらうための質問。「〇〇の手順書を用意してください」「〇〇の記録を確認できるようにしてください」など書面確認を中心に。\n${buildCommonCtx(units)}\n【条項ごとの生成問数（事前確認）】\n${getClauseConfigs('pre')}${JSON_FMT}\n【作成ルール】各工場・部署の業務特性に即した具体的な質問。クリーニング業特有リスク（衣類紛失・感染性リネン・食品衛生・BCP等）を反映。`;}
+function buildOnPrompt(units){return `あなたはクリーニング業のISO内部監査の専門家です。【当日質問（口頭インタビュー用）】のチェックリストを作成してください。\n【当日質問とは】監査当日に担当者に口頭で行う質問。「実際にどのようにやっていますか？」「問題が起きたときはどうしますか？」など担当者の理解度・実際の運用状況・手順の定着を確認する質問。事前確認質問と内容が重複しないこと。\n${buildCommonCtx(units)}\n【条項ごとの生成問数（当日質問）】\n${getClauseConfigs('on')}${JSON_FMT}\n【作成ルール】現場担当者への口頭インタビューを想定した問いかけ形式。事前確認質問とは異なる視点で現場の実態・理解度・定着状況を確認。`;}
+
+// ============================
+// GROQ API
+// ============================
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+async function callGroqOnce(prompt){
+  const apiKey=document.getElementById('apikey').value.trim();
+  const model=document.getElementById('model-sel').value;
+  const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},
+    body:JSON.stringify({model,messages:[{role:'system',content:'あなたはクリーニング業のISO内部監査の専門家です。必ずJSON形式のみで返答してください。説明文やマークダウンの```は不要です。'},{role:'user',content:prompt}],temperature:0.7,max_tokens:8192})
+  });
+  const data=await res.json();
+  if(res.status===429){const msg=data?.error?.message||'';const match=msg.match(/try again in ([\d.]+)s/i);const waitSec=match?Math.ceil(parseFloat(match[1]))+2:62;return {rateLimited:true,waitSec,data};}
+  if(!res.ok)throw new Error(`Groq APIエラー [${res.status}]: ${data?.error?.message||JSON.stringify(data)}`);
+  const raw=data?.choices?.[0]?.message?.content||'';
+  if(!raw)throw new Error('応答が空です。別のモデルを選択して再試行してください。');
+  return {rateLimited:false,raw};
+}
+async function callGroq(prompt,lmsgEl){
+  const MAX_RETRY=4;
+  for(let attempt=1;attempt<=MAX_RETRY;attempt++){
+    const result=await callGroqOnce(prompt);
+    if(!result.rateLimited){
+      const raw=result.raw;
+      const clean=raw.replace(/```json|```/g,'').trim();
+      const si=clean.indexOf('{'),ei=clean.lastIndexOf('}');
+      const parsed=JSON.parse(si>=0&&ei>si?clean.substring(si,ei+1):clean);
+      const items=[];
+      (parsed.sections||[]).forEach(sec=>{(sec.items||[]).forEach(item=>{items.push({...item,standard:sec.standard,clauseNo:sec.clause,clauseTitle:sec.title});});});
+      return {sections:parsed.sections,items};
+    }
+    if(attempt===MAX_RETRY) throw new Error(`Groq APIエラー [429]: レート制限。しばらく待ってから再試行するか、モデルを変更してください。`);
+    const waitSec=result.waitSec;
+    for(let s=waitSec;s>0;s--){if(lmsgEl) lmsgEl.textContent=`レート制限のため ${s}秒 待機中... (${attempt}/${MAX_RETRY-1}回目のリトライ)`;await sleep(1000);}
+    if(lmsgEl) lmsgEl.textContent='リトライ中...';
+  }
+}
+
+// ============================
+// GENERATE
+// ============================
+async function generate(){
+  const apiKey=document.getElementById('apikey').value.trim();
+  if(!apiKey){alert('APIキーを入力してください');return;}
+  if(selectedDepts.size===0){alert('監査対象を1つ以上選択してください');return;}
+  const units=getSelectedUnits();
+  document.getElementById('cfg').style.display='none';
+  document.getElementById('loading').style.display='block';
+  document.getElementById('result').style.display='none';
+  document.getElementById('errmsg').innerHTML='';
+  checkStates={};
+  const lmsgEl=document.getElementById('lmsg');
+  const msgs=['AIが規格要求事項を分析中...','各工場・部署の業務プロセスをマッピング中...','事前確認質問を生成中...','当日質問を生成中...'];
+  let mi=0; const iv=setInterval(()=>{if(!lmsgEl.textContent.includes('待機中')&&!lmsgEl.textContent.includes('リトライ')) lmsgEl.textContent=msgs[mi++%msgs.length];},2200);
+  try{
+    const preRes=await callGroq(buildPrePrompt(units),lmsgEl);
+    preItems=preRes.items; preSections=preRes.sections;
+    preItems.forEach(i=>{checkStates['pre-'+i.id]=false;});
+    lmsgEl.textContent='当日質問（口頭）を生成中...';
+    const onRes=await callGroq(buildOnPrompt(units),lmsgEl);
+    onItems=onRes.items; onSections=onRes.sections;
+    onItems.forEach(i=>{checkStates['on-'+i.id]=false;});
+    clearInterval(iv);
+    document.getElementById('loading').style.display='none';
+
+    const auditNo=document.getElementById('audit-no').value;
+    const auditDate=document.getElementById('audit-date').value;
+    const auditor=getAuditorString();
+    const fy=auditDate?auditDate.substring(0,4):'';
+    const record={
+      id:'CL-'+Date.now(),
+      auditNo,auditDate,auditor,fy,
+      stds:[...selectedStds],
+      depts:units.map(u=>u.label),
+      level:selectedLevel,
+      preSections,preItems,onSections,onItems,
+      savedAt:new Date().toISOString()
+    };
+    if(db) await dbPut('checklists',record).catch(console.error);
+    // GASへ同期
+    syncToGAS('checklist', record);
+
+    renderResult(units);
+  }catch(err){
+    clearInterval(iv);
+    document.getElementById('loading').style.display='none';
+    document.getElementById('cfg').style.display='block';
+    document.getElementById('errmsg').innerHTML=`<div class="err">生成中にエラーが発生しました：<br>${err.message}</div>`;
+  }
+}
+
+// ============================
+// RENDER RESULT
+// ============================
+function renderResult(units){
+  const deptBadges=units.map(u=>`<span class="badge b-teal">${u.label}</span>`).join('');
+  const stdBadges=[...selectedStds].map(s=>`<span class="badge b-coral">ISO ${s}:${STD_VERSIONS[s]||STD_CURRENT[s]}</span>`).join('');
+  const lvlLabel={elementary:'🎒 小学生',business:'💼 ビジネス',expert:'🎓 専門家'}[selectedLevel];
+  const preTotal=preItems.length,onTotal=onItems.length;
+  const auditNo=document.getElementById('audit-no').value;
+  const auditDate=document.getElementById('audit-date').value;
+  const auditor=getAuditorString();
+
+  let html=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem">
+      <div>
+        <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:5px">✅ チェックリスト 生成完了</div>
+        <div>${stdBadges}<span class="badge b-blue">${lvlLabel}</span></div>
+        <div style="margin-top:4px">${deptBadges}</div>
+        <div style="font-size:10px;color:var(--gray4);margin-top:4px">💾 ブラウザ＆スプレッドシートに自動保存済み</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('cfg').style.display='block';document.getElementById('result').style.display='none'">再設定</button>
+        <button class="btn btn-gold btn-sm" onclick="exportExcel('${auditNo}','${auditDate}','${auditor}')">📊 Excel出力</button>
+      </div>
+    </div>
+    <div class="res-tabs">
+      <div class="res-tab on" id="tab-pre" onclick="switchTab('pre')">事前確認質問（${preTotal}件）</div>
+      <div class="res-tab" id="tab-on" onclick="switchTab('on')">当日質問・口頭（${onTotal}件）</div>
+    </div>
+    <div id="pane-pre" class="res-tab-pane on">
+      <div class="res-hdr"><div><div style="font-size:13px;font-weight:500;color:var(--text)">事前確認質問</div><div style="font-size:11px;color:var(--blue);margin-top:2px">監査1〜2週間前に被監査部門へ送付・書類準備を依頼する質問</div></div><div class="prog-txt">完了: <span id="pre-done">0</span>/${preTotal}</div></div>
+      <div class="prog-bar"><div class="prog-fill" id="pre-prog" style="width:0%"></div></div>
+      ${renderSections(preSections,'pre')}
+    </div>
+    <div id="pane-on" class="res-tab-pane">
+      <div class="res-hdr"><div><div style="font-size:13px;font-weight:500;color:var(--text)">当日質問（口頭インタビュー）</div><div style="font-size:11px;color:var(--teal);margin-top:2px">監査当日に担当者へ口頭で確認する質問</div></div><div class="prog-txt">完了: <span id="on-done">0</span>/${onTotal}</div></div>
+      <div class="prog-bar"><div class="prog-fill" id="on-prog" style="width:0%"></div></div>
+      ${renderSections(onSections,'on')}
+    </div>`;
+  document.getElementById('result').innerHTML=html;
+  document.getElementById('result').style.display='block';
+}
+
+function renderSections(sections,prefix){
+  let html='';
+  (sections||[]).forEach(sec=>{
+    const is9=sec.standard==='ISO 9001';
+    html+=`<div class="cl-sec"><div class="cl-shdr ${is9?'sh9':'sh22'}">${is9?'📋':'🛡️'} ${sec.standard} — ${sec.title} <span style="opacity:.65;font-weight:400">（第${sec.clause}項）</span></div><div class="cl-items">`;
+    (sec.items||[]).forEach(item=>{
+      const sid=prefix+'-'+item.id;
+      html+=`<div class="cl-item" id="row-${sid}"><div class="chk" id="cb-${sid}" onclick="toggle('${sid}','${prefix}')"></div><div style="flex:1"><div class="idept">📍 ${item.target}</div><div class="iq">${item.question}</div><div class="iref">${item.reference}</div>${item.hint?`<div class="ihint">💡 ${item.hint}</div>`:''} ${item.evidence?`<div class="ievidence">📄 ${item.evidence}</div>`:''}</div></div>`;
+    });
+    html+=`</div></div>`;
+  });
+  return html;
+}
+
+function toggle(sid,prefix){
+  checkStates[sid]=!checkStates[sid];
+  document.getElementById('cb-'+sid).classList.toggle('on',checkStates[sid]);
+  document.getElementById('row-'+sid).classList.toggle('done',checkStates[sid]);
+  const items=prefix==='pre'?preItems:onItems;
+  const done=items.filter(i=>checkStates[prefix+'-'+i.id]).length;
+  const total=items.length;
+  document.getElementById(prefix+'-done').textContent=done;
+  document.getElementById(prefix+'-prog').style.width=Math.round(done/total*100)+'%';
+}
+function switchTab(t){['pre','on'].forEach(x=>{document.getElementById('tab-'+x).classList.toggle('on',x===t);document.getElementById('pane-'+x).classList.toggle('on',x===t);});}
+
+// ============================
+// HISTORY
+// ============================
+let histAllData=[];
+async function loadHistory(){
+  if(!db){await openDB();}
+  const localData=await dbGetAll('checklists').catch(()=>[]);
+  // GASからも取得してマージ
+  const gasData=await loadFromGAS('checklist');
+  const merged=mergeRecords(localData, gasData);
+  histAllData=merged.sort((a,b)=>b.savedAt?.localeCompare(a.savedAt||'')||0);
+  buildYrTabs(histAllData,'yr-tabs','all',filterByYear);
+  renderHistory(histAllData);
+}
+
+function mergeRecords(local, remote) {
+  const map = new Map();
+  local.forEach(r => map.set(r.id, r));
+  remote.forEach(r => { if (!map.has(r.id)) map.set(r.id, r); });
+  return Array.from(map.values());
+}
+
+function buildYrTabs(data,tabsId,currentYr,clickFn){
+  const yrs=[...new Set(data.map(d=>d.fy||'不明'))].sort((a,b)=>b.localeCompare(a));
+  const el=document.getElementById(tabsId);
+  el.innerHTML=`<div class="yr-tab ${currentYr==='all'?'on':''}" onclick="${clickFn.name}('all')">すべて</div>`
+    +yrs.map(y=>`<div class="yr-tab ${currentYr===y?'on':''}" onclick="${clickFn.name}('${y}')">${y}年</div>`).join('');
+}
+
+function filterByYear(yr){
+  document.querySelectorAll('#yr-tabs .yr-tab').forEach(t=>t.classList.toggle('on',t.textContent===(yr==='all'?'すべて':yr+'年')));
+  const filtered=yr==='all'?histAllData:histAllData.filter(d=>d.fy===yr);
+  renderHistory(filtered);
+}
+
+function renderHistory(data){
+  const el=document.getElementById('hist-list');
+  if(!data.length){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">該当する履歴がありません</div></div>';return;}
+  el.innerHTML=data.map(d=>{
+    const preCount=(d.preItems||[]).length;
+    const onCount=(d.onItems||[]).length;
+    const depts=(d.depts||[]).slice(0,3).join('、')+(d.depts?.length>3?'…':'');
+    return `<div class="hist-card">
+      <div class="hist-card-hdr" onclick="toggleHistCard('h-${d.id}')">
+        <div class="hist-info">
+          <div class="hist-title">📋 ${d.auditNo||'（番号なし）'} <span class="badge b-gold">${d.fy||''}年</span></div>
+          <div class="hist-meta">📅 ${d.auditDate||'日付不明'} 　👤 ${d.auditor||'監査員不明'} 　🏭 ${depts||'部署不明'}</div>
+          <div style="margin-top:4px">${(d.stds||[]).map(s=>`<span class="badge b-coral">ISO ${s}</span>`).join('')}<span class="badge b-blue">事前:${preCount}件</span><span class="badge b-teal">当日:${onCount}件</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <button class="btn btn-gold btn-xs" onclick="event.stopPropagation();exportHistExcel('${d.id}')">Excel</button>
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();confirmDeleteChecklist('${d.id}')">削除</button>
+        </div>
+      </div>
+      <div class="hist-body" id="h-${d.id}">
+        ${renderHistSections(d.preSections||[],'pre','事前確認質問')}
+        ${renderHistSections(d.onSections||[],'on','当日質問（口頭）')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderHistSections(sections,type,label){
+  if(!sections.length) return '';
+  let html=`<div class="hist-section-lbl">${type==='pre'?'📋':'💬'} ${label}</div>`;
+  sections.forEach(sec=>{
+    const is9=sec.standard==='ISO 9001';
+    html+=`<div style="font-size:11px;font-weight:600;color:${is9?'var(--coral)':'var(--blue)'};margin:6px 0 3px">${sec.standard} 第${sec.clause}項 ${sec.title}</div>`;
+    html+='<ul class="hist-q-list">';
+    (sec.items||[]).forEach(item=>{
+      html+=`<li class="hist-q-item ${type}">📍 ${item.target}｜${item.question}</li>`;
+    });
+    html+='</ul>';
+  });
+  return html;
+}
+
+function toggleHistCard(id){document.getElementById(id).classList.toggle('open');}
+
+function confirmDeleteChecklist(id){
+  document.getElementById('confirm-title').textContent='チェックリストを削除';
+  document.getElementById('confirm-msg').textContent='この監査チェックリストの履歴を削除します。この操作は元に戻せません。';
+  document.getElementById('confirm-ok').onclick=async()=>{
+    await dbDelete('checklists',id).catch(console.error);
+    closeConfirm(); loadHistory();
+  };
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function closeConfirm(){document.getElementById('confirm-modal').classList.remove('open');}
+
+async function exportHistExcel(id){
+  const data=histAllData.find(d=>d.id===id);
+  if(!data) return;
+  exportExcelFromData(data.auditNo,data.auditDate,data.auditor,data.stds,data.preSections,data.preItems,data.onSections,data.onItems);
+}
+
+// ============================
+// REPORTS
+// ============================
+let reportAllData=[];
+
+const FINDING_DEFS=[
+  {key:'major', label:'① 不適合事項（Major NC）',     color:'D9534F'},
+  {key:'minor', label:'② 軽微な不適合（Minor NC）',   color:'E88C3A'},
+  {key:'obs',   label:'③ 観察事項（Observation）',    color:'C9920A'},
+  {key:'rec',   label:'④ 改善推奨事項',               color:'185FA5'},
+  {key:'good',  label:'⑤ 良好事例（Good Practice）',  color:'0F6E56'},
+];
+
+let rptSections={};
+function emptyRow(){return {clause:'',finding:'',action:''};}
+function initRptSections(){rptSections={};FINDING_DEFS.forEach(d=>{rptSections[d.key]=[emptyRow()];});}
+
+function renderFindingSections(){
+  const wrap=document.getElementById('rpt-sections-wrap');
+  wrap.innerHTML=FINDING_DEFS.map(def=>`
+    <div class="finding-section">
+      <div class="finding-section-hdr" style="background:#${def.color}">${def.label}</div>
+      <div class="finding-section-body">
+        <table class="finding-table" id="ftbl-${def.key}">
+          <thead><tr>
+            <th style="width:110px">規格項番</th>
+            <th style="width:38%">指摘・所見内容</th>
+            <th style="width:38%">対応策・改善内容</th>
+            <th class="del-cell"></th>
+          </tr></thead>
+          <tbody id="ftbody-${def.key}"></tbody>
+        </table>
+        <button class="add-row-btn" onclick="addFindingRow('${def.key}')">＋ 行を追加</button>
+      </div>
+    </div>
+  `).join('');
+  FINDING_DEFS.forEach(def=>renderFindingRows(def.key));
+}
+
+function renderFindingRows(key){
+  const tbody=document.getElementById('ftbody-'+key);
+  tbody.innerHTML=(rptSections[key]||[]).map((row,i)=>`
+    <tr>
+      <td><input type="text" value="${esc(row.clause)}" oninput="updateRow('${key}',${i},'clause',this.value)" placeholder="例: ISO 9001 §8.3"></td>
+      <td><textarea oninput="updateRow('${key}',${i},'finding',this.value)" placeholder="指摘内容を記入...">${esc(row.finding)}</textarea></td>
+      <td><textarea oninput="updateRow('${key}',${i},'action',this.value)" placeholder="対応策を記入...">${esc(row.action)}</textarea></td>
+      <td class="del-cell"><button class="del-row-btn" onclick="delFindingRow('${key}',${i})" title="削除">×</button></td>
+    </tr>
+  `).join('');
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function updateRow(key,i,field,val){if(!rptSections[key]) return;rptSections[key][i][field]=val;}
+function addFindingRow(key){rptSections[key].push(emptyRow());renderFindingRows(key);}
+function delFindingRow(key,i){if(rptSections[key].length<=1){rptSections[key][0]={clause:'',finding:'',action:''};}else{rptSections[key].splice(i,1);}renderFindingRows(key);}
+
+async function loadReports(){
+  if(!db){await openDB();}
+  const localData=await dbGetAll('reports').catch(()=>[]);
+  const gasData=await loadFromGAS('report');
+  const merged=mergeRecords(localData, gasData);
+  reportAllData=merged.sort((a,b)=>b.savedAt?.localeCompare(a.savedAt||'')||0);
+  buildYrTabs(reportAllData,'rpt-yr-tabs','all',filterReportByYear);
+  renderReports(reportAllData);
+}
+
+function filterReportByYear(yr){
+  document.querySelectorAll('#rpt-yr-tabs .yr-tab').forEach(t=>t.classList.toggle('on',t.textContent===(yr==='all'?'すべて':yr+'年')));
+  const filtered=yr==='all'?reportAllData:reportAllData.filter(d=>d.fy===yr);
+  renderReports(filtered);
+}
+
+function renderReports(data){
+  const el=document.getElementById('rpt-list');
+  if(!data.length){el.innerHTML='<div class="empty"><div class="empty-icon">📝</div><div class="empty-txt">該当する監査報告書がありません</div></div>';return;}
+  el.innerHTML=data.map(d=>`
+    <div class="rpt-card">
+      <div class="rpt-card-hdr" onclick="toggleRptCard('rpt-body-${d.id}')">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--text)">📝 ${d.rptNo||'（番号なし）'} <span class="badge b-gold">${d.fy||''}年度</span></div>
+          <div style="font-size:10px;color:var(--gray4);margin-top:2px">📅 ${d.rptDate||'日付不明'} 　👤 ${d.rptAuditor||''} 　🏭 ${d.rptDept||''}</div>
+          <div style="margin-top:3px">${summaryBadges(d)}</div>
+        </div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();editReport('${d.id}')">編集</button>
+          <button class="btn btn-gold btn-xs" onclick="event.stopPropagation();exportReportExcelById('${d.id}')">Excel</button>
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();confirmDeleteReport('${d.id}')">削除</button>
+        </div>
+      </div>
+      <div class="rpt-card-body" id="rpt-body-${d.id}">
+        ${renderReportBody(d)}
+      </div>
+    </div>
+  `).join('');
+}
+
+function summaryBadges(d){
+  return FINDING_DEFS.map(def=>{
+    const rows=(d.sections||{})[def.key]||[];
+    const count=rows.filter(r=>r.finding?.trim()).length;
+    if(!count) return '';
+    const colors={major:'b-coral',minor:'b-coral',obs:'b-gold',rec:'b-blue',good:'b-teal'};
+    const short={major:'Major',minor:'Minor',obs:'観察',rec:'改善',good:'良好'};
+    return `<span class="badge ${colors[def.key]||'b-gray'}">${short[def.key]} ${count}件</span>`;
+  }).join('');
+}
+
+function renderReportBody(d){
+  const secs=d.sections||{};
+  let html='';
+  FINDING_DEFS.forEach(def=>{
+    const rows=(secs[def.key]||[]).filter(r=>r.finding?.trim()||r.clause?.trim()||r.action?.trim());
+    if(!rows.length) return;
+    html+=`<div style="margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;color:#${def.color};margin-bottom:4px">${def.label}</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead><tr>
+          <th style="background:var(--gray2);padding:4px 6px;border:1px solid var(--gray3);font-size:10px;width:110px">規格項番</th>
+          <th style="background:var(--gray2);padding:4px 6px;border:1px solid var(--gray3);font-size:10px">指摘・所見内容</th>
+          <th style="background:var(--gray2);padding:4px 6px;border:1px solid var(--gray3);font-size:10px">対応策・改善内容</th>
+        </tr></thead>
+        <tbody>${rows.map(r=>`<tr>
+          <td style="border:1px solid var(--gray3);padding:4px 6px;color:var(--gray5)">${esc(r.clause)}</td>
+          <td style="border:1px solid var(--gray3);padding:4px 6px;white-space:pre-wrap;line-height:1.5">${esc(r.finding)}</td>
+          <td style="border:1px solid var(--gray3);padding:4px 6px;white-space:pre-wrap;line-height:1.5;background:var(--blue-light)">${esc(r.action)}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+  });
+  if(d.comment?.trim()){
+    html+=`<div style="margin-bottom:4px"><div style="font-size:10px;font-weight:700;color:var(--navy);margin-bottom:3px">⑥ 総合評価・コメント</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.7;white-space:pre-wrap;padding:6px 10px;background:var(--gray1);border-radius:4px">${esc(d.comment)}</div></div>`;
+  }
+  return html||'<div style="color:var(--gray4);font-size:12px">（内容なし）</div>';
+}
+
+function toggleRptCard(id){document.getElementById(id).classList.toggle('open');}
+
+function openNewReport(){
+  editingReportId=null;
+  document.getElementById('rpt-editor-title').textContent='📝 監査報告書 新規作成';
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('rpt-no').value='RPT-'+today.replace(/-/g,'').substring(0,8)+'-001';
+  document.getElementById('rpt-date').value=today;
+  document.getElementById('rpt-fy').value=today.substring(0,4);
+  // 内部監査員チップ初期化（ログインユーザーを自動設定）
+  rptAuditorList = auditorList.length ? [...auditorList] : [];
+  renderRptAuditorChips();
+  document.getElementById('rpt-dept').value='';
+  document.getElementById('rpt-std').value='ISO 9001 / ISO 22301';
+  document.getElementById('rpt-comment').value='';
+  initRptSections();
+  renderFindingSections();
+  loadChecklistOptionsForReport();
+  document.getElementById('report-editor-overlay').classList.add('open');
+}
+
+async function loadChecklistOptionsForReport(){
+  if(!db){await openDB();}
+  const data=await dbGetAll('checklists').catch(()=>[]);
+  const sel=document.getElementById('rpt-ref-checklist');
+  sel.innerHTML='<option value="">-- 参照なし（手動入力）--</option>'
+    +data.sort((a,b)=>b.savedAt?.localeCompare(a.savedAt||'')||0).map(d=>`<option value="${d.id}">${d.auditNo||'番号なし'} (${d.auditDate||'日付不明'}) - ${(d.depts||[]).slice(0,2).join('、')}</option>`).join('');
+}
+
+async function editReport(id){
+  const d=reportAllData.find(r=>r.id===id);
+  if(!d) return;
+  editingReportId=id;
+  document.getElementById('rpt-editor-title').textContent='📝 監査報告書 編集';
+  document.getElementById('rpt-no').value=d.rptNo||'';
+  document.getElementById('rpt-date').value=d.rptDate||'';
+  document.getElementById('rpt-fy').value=d.fy||'';
+  // 内部監査員チップ復元
+  rptAuditorList = (d.rptAuditor||'').split('、').map(s=>s.trim()).filter(Boolean);
+  renderRptAuditorChips();
+  document.getElementById('rpt-dept').value=d.rptDept||'';
+  document.getElementById('rpt-std').value=d.rptStd||'';
+  document.getElementById('rpt-comment').value=d.comment||'';
+  rptSections={};
+  FINDING_DEFS.forEach(def=>{
+    rptSections[def.key]=(d.sections?.[def.key]?.length>0)?d.sections[def.key]:[emptyRow()];
+  });
+  renderFindingSections();
+  await loadChecklistOptionsForReport();
+  document.getElementById('rpt-ref-checklist').value=d.refChecklistId||'';
+  document.getElementById('report-editor-overlay').classList.add('open');
+}
+
+async function saveReport(){
+  const id=editingReportId||'RPT-'+Date.now();
+  const record={
+    id,
+    rptNo:document.getElementById('rpt-no').value,
+    rptDate:document.getElementById('rpt-date').value,
+    fy:document.getElementById('rpt-fy').value,
+    rptAuditor:getRptAuditorString(),
+    rptDept:document.getElementById('rpt-dept').value,
+    rptStd:document.getElementById('rpt-std').value,
+    comment:document.getElementById('rpt-comment').value,
+    refChecklistId:document.getElementById('rpt-ref-checklist').value,
+    sections:JSON.parse(JSON.stringify(rptSections)),
+    savedAt:new Date().toISOString()
+  };
+  if(db) await dbPut('reports',record).catch(console.error);
+  // GASへ同期
+  syncToGAS('report', record);
+  closeReportEditor();
+  loadReports();
+}
+
+function closeReportEditor(){document.getElementById('report-editor-overlay').classList.remove('open');}
+
+function confirmDeleteReport(id){
+  document.getElementById('confirm-title').textContent='報告書を削除';
+  document.getElementById('confirm-msg').textContent='この監査報告書を削除します。この操作は元に戻せません。';
+  document.getElementById('confirm-ok').onclick=async()=>{
+    await dbDelete('reports',id).catch(console.error);
+    closeConfirm(); loadReports();
+  };
+  document.getElementById('confirm-modal').classList.add('open');
+}
+
+function exportReportExcel(){
+  const d={
+    rptNo:document.getElementById('rpt-no').value,
+    rptDate:document.getElementById('rpt-date').value,
+    fy:document.getElementById('rpt-fy').value,
+    rptAuditor:getRptAuditorString(),
+    rptDept:document.getElementById('rpt-dept').value,
+    rptStd:document.getElementById('rpt-std').value,
+    comment:document.getElementById('rpt-comment').value,
+    sections:rptSections
+  };
+  exportReportExcelData(d);
+}
+
+async function exportReportExcelById(id){
+  const d=reportAllData.find(r=>r.id===id);
+  if(!d) return;
+  exportReportExcelData(d);
+}
+
+// ============================
+// EXCEL EXPORT - CHECKLIST
+// ============================
+function exportExcel(auditNo,auditDate,auditor){
+  exportExcelFromData(auditNo,auditDate,auditor,[...selectedStds],preSections,preItems,onSections,onItems);
+}
+
+function exportExcelFromData(auditNo,auditDate,auditor,stds,preS,preI,onS,onI){
+  const wb=XLSX.utils.book_new();
+  wb.Props={Title:'ISO内部監査チェックリスト',Author:'ISO内部監査システム'};
+  const cellStyle={font:{sz:10},alignment:{vertical:'top',wrapText:true},border:{top:{style:'hair',color:{rgb:'CCCCCC'}},bottom:{style:'hair',color:{rgb:'CCCCCC'}},left:{style:'hair',color:{rgb:'CCCCCC'}},right:{style:'hair',color:{rgb:'CCCCCC'}}}};
+  const hintStyle={...cellStyle,fill:{fgColor:{rgb:'EBF3FB'}},font:{sz:9,italic:true,color:{rgb:'1F497D'}}};
+  const evidStyle={...cellStyle,fill:{fgColor:{rgb:'EDF7F0'}},font:{sz:9,italic:true,color:{rgb:'0F4C2A'}}};
+  const inputStyle={fill:{fgColor:{rgb:'FFFF99'}},alignment:{vertical:'top',wrapText:true},border:{top:{style:'thin',color:{rgb:'999999'}},bottom:{style:'thin',color:{rgb:'999999'}},left:{style:'thin',color:{rgb:'999999'}},right:{style:'thin',color:{rgb:'999999'}}}};
+  const setCell=(ws,r,c,v,s)=>{const addr=XLSX.utils.encode_cell({r,c});ws[addr]={v,s,t:typeof v==='number'?'n':'s'};};
+
+  function makeSheet(sections,sheetName,desc){
+    const ws={};const merges=[];let r=0;
+    const titleStyle={font:{bold:true,sz:16,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'1F3864'}},alignment:{horizontal:'center',vertical:'center'}};
+    setCell(ws,r,0,'ISO内部監査チェックリスト',titleStyle);merges.push({s:{r,c:0},e:{r,c:11}});
+    ws['!rows']=[{hpt:42}];r++;
+    setCell(ws,r,0,desc,{font:{sz:10,italic:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'2E4F8A'}},alignment:{horizontal:'left',vertical:'center'}});
+    merges.push({s:{r,c:0},e:{r,c:11}});(ws['!rows']=ws['!rows']||[]).push({hpt:18});r++;
+    const infoStyle={font:{bold:true,sz:10},fill:{fgColor:{rgb:'BDD7EE'}},alignment:{horizontal:'center',vertical:'center'}};
+    const infoVal={font:{sz:10},alignment:{horizontal:'left',vertical:'center'}};
+    [['監査番号',auditNo],['監査日',auditDate],['内部監査員',auditor],['対象規格',(stds||[]).map(s=>`ISO ${s}:${STD_VERSIONS[s]||STD_CURRENT[s]}`).join(' / ')]].forEach(([l,v])=>{
+      setCell(ws,r,0,l,infoStyle);setCell(ws,r,1,v,infoVal);merges.push({s:{r,c:1},e:{r,c:11}});
+      (ws['!rows']=ws['!rows']||[]).push({hpt:18});r++;
+    });
+    r++;
+    const thStyle={font:{bold:true,sz:10,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'1F3864'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:{top:{style:'thin',color:{rgb:'FFFFFF'}},bottom:{style:'thin',color:{rgb:'FFFFFF'}},left:{style:'thin',color:{rgb:'FFFFFF'}},right:{style:'thin',color:{rgb:'FFFFFF'}}}};
+    ['No.','規格','項番','セクション','対象部署・工場','質問','参照条文','監査員ヒント','確認書類・証憑','確認結果','指摘区分','備考'].forEach((h,c)=>setCell(ws,r,c,h,thStyle));
+    (ws['!rows']=ws['!rows']||[]).push({hpt:22});r++;
+    ws['!cols']=[{wch:5},{wch:8},{wch:7},{wch:18},{wch:16},{wch:38},{wch:14},{wch:22},{wch:22},{wch:18},{wch:10},{wch:14}];
+    let no=1,prevClause=null;
+    sections.forEach(sec=>{
+      const is9=sec.standard==='ISO 9001';const clKey=sec.standard+sec.clause;
+      if(clKey!==prevClause){
+        prevClause=clKey;
+        const shStyle=is9?{font:{bold:true,sz:11,color:{rgb:'7B2911'}},fill:{fgColor:{rgb:'FCE4D6'}},alignment:{horizontal:'left',vertical:'center'}}:{font:{bold:true,sz:11,color:{rgb:'1F3864'}},fill:{fgColor:{rgb:'BDD7EE'}},alignment:{horizontal:'left',vertical:'center'}};
+        setCell(ws,r,0,`${is9?'[9001]':'[22301]'} ${sec.title}（第${sec.clause}項）`,shStyle);
+        merges.push({s:{r,c:0},e:{r,c:11}});(ws['!rows']=ws['!rows']||[]).push({hpt:20});r++;
+      }
+      (sec.items||[]).forEach(item=>{
+        const bg=no%2===0?'F2F8FF':'FFFFFF';
+        const rs={...cellStyle,fill:{fgColor:{rgb:bg}}};
+        setCell(ws,r,0,no,{...rs,alignment:{horizontal:'center',vertical:'top'}});
+        setCell(ws,r,1,sec.standard,is9?{font:{sz:9},fill:{fgColor:{rgb:'FCE4D6'}},alignment:{horizontal:'center',vertical:'top'}}:{font:{sz:9},fill:{fgColor:{rgb:'BDD7EE'}},alignment:{horizontal:'center',vertical:'top'}});
+        setCell(ws,r,2,`第${sec.clause}項`,{...rs,alignment:{horizontal:'center',vertical:'top'}});
+        setCell(ws,r,3,sec.title,rs);setCell(ws,r,4,item.target,rs);setCell(ws,r,5,item.question,rs);
+        setCell(ws,r,6,item.reference,{...rs,font:{sz:8}});setCell(ws,r,7,item.hint||'',hintStyle);setCell(ws,r,8,item.evidence||'',evidStyle);
+        setCell(ws,r,9,'',inputStyle);setCell(ws,r,10,'',inputStyle);setCell(ws,r,11,'',inputStyle);
+        (ws['!rows']=ws['!rows']||[]).push({hpt:48});r++;no++;
+      });
+    });
+    ws['!merges']=merges;ws['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:r,c:11}});
+    return ws;
+  }
+
+  XLSX.utils.book_append_sheet(wb,makeSheet(preS,'事前確認質問','【事前確認】監査1〜2週間前に被監査部門へ送付する質問です。黄色セルに確認結果・指摘区分・備考を記入してください。'),'事前確認質問');
+  XLSX.utils.book_append_sheet(wb,makeSheet(onS,'当日質問（口頭）','【当日質問】監査当日に担当者へ口頭で確認する質問です。黄色セルに確認結果・指摘区分・備考を記入してください。'),'当日質問（口頭）');
+
+  const sumWs={};const sm=[];let sr=0;
+  setCell(sumWs,sr,0,'監査所見まとめ',{font:{bold:true,sz:16,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'1F3864'}},alignment:{horizontal:'center',vertical:'center'}});
+  sm.push({s:{r:sr,c:0},e:{r:sr,c:7}});sr++;
+  [['監査番号',auditNo],['監査日',auditDate],['内部監査員',auditor],['対象規格',(stds||[]).map(s=>'ISO '+s).join(' / ')]].forEach(([l,v])=>{
+    setCell(sumWs,sr,0,l,{font:{bold:true,sz:10},fill:{fgColor:{rgb:'BDD7EE'}},alignment:{horizontal:'center',vertical:'center'}});
+    setCell(sumWs,sr,1,v,{font:{sz:10},alignment:{horizontal:'left',vertical:'center'}});
+    sm.push({s:{r:sr,c:1},e:{r:sr,c:7}});sr++;
+  });
+  sr++;
+  [['不適合事項','FFB3B3'],['軽微な不適合','FFD9B3'],['観察事項','FFFFB3'],['改善推奨事項','B3D9FF'],['良好事例','B3FFB3']].forEach(([lbl,col])=>{
+    setCell(sumWs,sr,0,lbl,{font:{bold:true,sz:11},fill:{fgColor:{rgb:col}},alignment:{horizontal:'left',vertical:'center'}});
+    sm.push({s:{r:sr,c:0},e:{r:sr,c:7}});sr++;
+    for(let k=0;k<3;k++){setCell(sumWs,sr,0,'',inputStyle);sm.push({s:{r:sr,c:0},e:{r:sr,c:7}});sr++;}sr++;
+  });
+  setCell(sumWs,sr,0,'総合評価・監査員コメント',{font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'1F3864'}},alignment:{horizontal:'left',vertical:'center'}});
+  sm.push({s:{r:sr,c:0},e:{r:sr,c:7}});sr++;
+  setCell(sumWs,sr,0,'',inputStyle);sm.push({s:{r:sr,c:0},e:{r:sr+4,c:7}});sr+=5;
+  sumWs['!merges']=sm;sumWs['!cols']=Array(8).fill({wch:18});
+  sumWs['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:sr,c:7}});
+  XLSX.utils.book_append_sheet(wb,sumWs,'監査所見まとめ');
+
+  const dateStr=(auditDate||'').replace(/-/g,'');
+  XLSX.writeFile(wb,`内部監査チェックリスト_${dateStr}_${auditNo||''}.xlsx`);
+}
+
+// ============================
+// EXCEL EXPORT - REPORT
+// ============================
+function exportReportExcelData(d){
+  const wb=XLSX.utils.book_new();
+  const setCell=(ws,r,c,v,s)=>{const addr=XLSX.utils.encode_cell({r,c});ws[addr]={v,s,t:typeof v==='number'?'n':'s'};};
+  const titleStyle={font:{bold:true,color:{rgb:'FFFFFF'},sz:16},fill:{fgColor:{rgb:'1F3864'}},alignment:{horizontal:'center',vertical:'center'}};
+  const subStyle={font:{sz:11,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'2E75B6'}},alignment:{horizontal:'center',vertical:'center'}};
+  const lblStyle={font:{bold:true,sz:10},fill:{fgColor:{rgb:'BDD7EE'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}}};
+  const valStyle={font:{sz:10},alignment:{horizontal:'left',vertical:'center',wrapText:true},border:{top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}}};
+  const thStyle=(hex)=>({font:{bold:true,sz:10,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:hex}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:{top:{style:'thin',color:{rgb:'FFFFFF'}},bottom:{style:'thin',color:{rgb:'FFFFFF'}},left:{style:'thin',color:{rgb:'FFFFFF'}},right:{style:'thin',color:{rgb:'FFFFFF'}}}});
+  const tdStyle={font:{sz:10},alignment:{horizontal:'left',vertical:'top',wrapText:true},border:{top:{style:'hair',color:{rgb:'CCCCCC'}},bottom:{style:'hair',color:{rgb:'CCCCCC'}},left:{style:'hair',color:{rgb:'CCCCCC'}},right:{style:'hair',color:{rgb:'CCCCCC'}}}};
+  const tdBlue={...tdStyle,fill:{fgColor:{rgb:'EBF3FB'}}};
+  const inputStyle={fill:{fgColor:{rgb:'FFFF99'}},alignment:{vertical:'top',wrapText:true},border:{top:{style:'thin',color:{rgb:'999999'}},bottom:{style:'thin',color:{rgb:'999999'}},left:{style:'thin',color:{rgb:'999999'}},right:{style:'thin',color:{rgb:'999999'}}}};
+
+  const ws={};const merges=[];
+  ws['!cols']=[{wch:14},{wch:42},{wch:42}];
+  let r=0;
+
+  setCell(ws,r,0,'内部監査報告書',titleStyle);merges.push({s:{r,c:0},e:{r,c:2}});
+  ws['!rows']=[{hpt:42}];r++;
+  setCell(ws,r,0,'クリーニング業 ISO 9001 / ISO 22301 対応',subStyle);merges.push({s:{r,c:0},e:{r,c:2}});
+  (ws['!rows']=ws['!rows']||[]).push({hpt:18});r+=2;
+
+  [['監査番号',d.rptNo||''],['年度',d.fy?d.fy+'年度':''],['監査日',d.rptDate||''],['内部監査員',d.rptAuditor||''],['対象部署',d.rptDept||''],['対象規格',d.rptStd||'']].forEach(([lbl,val])=>{
+    setCell(ws,r,0,lbl,lblStyle);setCell(ws,r,1,val,valStyle);merges.push({s:{r,c:1},e:{r,c:2}});
+    (ws['!rows']=ws['!rows']||[]).push({hpt:20});r++;
+  });
+  r++;
+
+  const secs=d.sections||{};
+  FINDING_DEFS.forEach(def=>{
+    const rows=(secs[def.key]||[]).filter(rw=>rw.finding?.trim()||rw.clause?.trim());
+    setCell(ws,r,0,def.label,thStyle(def.color));merges.push({s:{r,c:0},e:{r,c:2}});
+    (ws['!rows']=ws['!rows']||[]).push({hpt:22});r++;
+    ['規格項番','指摘・所見内容','対応策・改善内容'].forEach((h,c)=>setCell(ws,r,c,h,thStyle(def.color)));
+    (ws['!rows']=ws['!rows']||[]).push({hpt:18});r++;
+    if(rows.length){
+      rows.forEach(rw=>{
+        setCell(ws,r,0,rw.clause||'',tdStyle);
+        setCell(ws,r,1,rw.finding||'',tdStyle);
+        setCell(ws,r,2,rw.action||'',tdBlue);
+        (ws['!rows']=ws['!rows']||[]).push({hpt:52});r++;
+      });
+    } else {
+      setCell(ws,r,0,'（なし）',{...tdStyle,font:{sz:10,italic:true,color:{rgb:'AAAAAA'}}});
+      merges.push({s:{r,c:0},e:{r,c:2}});(ws['!rows']=ws['!rows']||[]).push({hpt:20});r++;
+    }
+    r++;
+  });
+
+  setCell(ws,r,0,'⑥ 総合評価・監査員コメント',thStyle('1F3864'));merges.push({s:{r,c:0},e:{r,c:2}});
+  (ws['!rows']=ws['!rows']||[]).push({hpt:22});r++;
+  setCell(ws,r,0,d.comment||'',{...inputStyle,font:{sz:10}});merges.push({s:{r,c:0},e:{r,c:2}});
+  (ws['!rows']=ws['!rows']||[]).push({hpt:70});r+=2;
+
+  ['監査員署名','承認者署名'].forEach(lbl=>{
+    setCell(ws,r,0,lbl,lblStyle);setCell(ws,r,1,'',inputStyle);merges.push({s:{r,c:1},e:{r,c:2}});
+    (ws['!rows']=ws['!rows']||[]).push({hpt:30});r++;
+  });
+
+  ws['!merges']=merges;
+  ws['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:r+2,c:2}});
+  XLSX.utils.book_append_sheet(wb,ws,'監査報告書');
+  XLSX.writeFile(wb,`内部監査報告書_${(d.fy||'').replace(/年度/,'')}年度_${d.rptNo||'report'}.xlsx`);
+}
+
+// ============================
+// DEPT MASTER MANAGEMENT
+// ============================
+const MASTER_DEFAULT = JSON.parse(JSON.stringify(MASTER));
+const LS_DEPT_KEY = 'iso_audit_dept_master';
+
+function loadDeptMaster() {
+  try {
+    const saved = localStorage.getItem(LS_DEPT_KEY);
+    if (!saved) return;
+    const custom = JSON.parse(saved);
+    custom.forEach(cGrp => {
+      const grp = MASTER.find(g => g.grpKey === cGrp.grpKey);
+      if (!grp) { MASTER.push(cGrp); return; }
+      cGrp.subs.forEach(cSub => {
+        let sub = grp.subs.find(s => s.subLabel === cSub.subLabel);
+        if (!sub) { grp.subs.push(cSub); return; }
+        cSub.items.forEach(cItem => {
+          const ex = sub.items.find(i => i.key === cItem.key);
+          if (ex) { ex.desc = cItem.desc; ex.points = cItem.points; ex.risks = cItem.risks; ex.label = cItem.label; }
+          else { sub.items.push(cItem); }
+        });
+        sub.items = sub.items.filter(i => !i._deleted);
+      });
+      grp.subs = grp.subs.filter(s => !s._deleted);
+    });
+    for (let i = MASTER.length - 1; i >= 0; i--) { if (MASTER[i]._deleted) MASTER.splice(i, 1); }
+  } catch(e) { console.warn('loadDeptMaster error', e); }
+}
+
+function saveDeptMaster() {
+  try {
+    localStorage.setItem(LS_DEPT_KEY, JSON.stringify(MASTER));
+    const msg = document.getElementById('dept-save-msg');
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 2500);
+    buildDeptTree();
+  } catch(e) { alert('保存に失敗しました: ' + e.message); }
+}
+
+function resetDeptMaster() {
+  if (!confirm('すべての部門設定を初期値に戻します。よろしいですか？')) return;
+  localStorage.removeItem(LS_DEPT_KEY);
+  MASTER.length = 0;
+  MASTER_DEFAULT.forEach(g => MASTER.push(JSON.parse(JSON.stringify(g))));
+  renderDeptSettings();
+  buildDeptTree();
+  const msg = document.getElementById('dept-save-msg');
+  msg.textContent = '↩ 初期値に戻しました';
+  msg.style.display = 'block';
+  setTimeout(() => { msg.textContent = '✅ 保存しました'; msg.style.display = 'none'; }, 2500);
+}
+
+function escH(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderDeptSettings() {
+  const wrap = document.getElementById('dept-settings-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  MASTER.forEach((grp, gi) => {
+    const grpEl = document.createElement('div');
+    grpEl.className = 'dept-setting-grp';
+    grpEl.innerHTML = `
+      <div class="dept-setting-grp-hdr">
+        <div class="dept-setting-grp-title">🏢 ${escH(grp.grpLabel)}</div>
+        <div class="dept-setting-grp-actions">
+          <button class="btn btn-ghost btn-xs" onclick="promptAddSub(${gi})" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)">＋ サブグループ追加</button>
+          <button class="btn btn-ghost btn-xs" onclick="promptAddDept(${gi})" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)">＋ 部門追加</button>
+        </div>
+      </div>`;
+    grp.subs.forEach((sub, si) => {
+      const subHdr = document.createElement('div');
+      subHdr.className = 'sub-section-hdr';
+      subHdr.textContent = '📂 ' + sub.subLabel;
+      grpEl.appendChild(subHdr);
+      sub.items.forEach((item, ii) => {
+        const defGrp = MASTER_DEFAULT.find(g => g.grpKey === grp.grpKey);
+        const defSub = defGrp?.subs.find(s => s.subLabel === sub.subLabel);
+        const defItem = defSub?.items.find(i => i.key === item.key);
+        const isModified = defItem && (defItem.desc !== item.desc || defItem.points !== item.points || defItem.risks !== item.risks);
+        const isNew = !defItem;
+        const itemEl = document.createElement('div');
+        itemEl.className = 'dept-setting-item';
+        itemEl.innerHTML = `
+          <div class="dept-item-hdr">
+            <div>
+              <span class="dept-item-label">${escH(item.label)}</span>
+              ${isModified ? '<span class="dept-modified-badge">編集済</span>' : ''}
+              ${isNew ? '<span class="dept-modified-badge" style="background:var(--gold-light);color:var(--gold)">新規</span>' : ''}
+            </div>
+            <div style="display:flex;gap:4px">
+              ${defItem ? `<button class="btn btn-ghost btn-xs" onclick="resetDeptItem('${grp.grpKey}',${si},'${item.key}')" title="初期値に戻す">↩</button>` : ''}
+              <button class="btn btn-coral btn-xs" onclick="deleteDeptItem('${grp.grpKey}',${si},${ii})">削除</button>
+            </div>
+          </div>
+          <div class="dept-field"><label>業務内容・説明</label>
+            <textarea oninput="updateDeptField('${grp.grpKey}',${si},${ii},'desc',this.value)">${escH(item.desc||'')}</textarea></div>
+          <div class="dept-field"><label>主要な監査着眼点</label>
+            <textarea oninput="updateDeptField('${grp.grpKey}',${si},${ii},'points',this.value)">${escH(item.points||'')}</textarea></div>
+          <div class="dept-field"><label>ISO観点のリスク</label>
+            <textarea oninput="updateDeptField('${grp.grpKey}',${si},${ii},'risks',this.value)">${escH(item.risks||'')}</textarea></div>`;
+        grpEl.appendChild(itemEl);
+      });
+    });
+    // 新規追加フォーム
+    const addArea = document.createElement('div');
+    addArea.id = `dept-add-area-${gi}`;
+    addArea.className = 'dept-add-form';
+    addArea.style.display = 'none';
+    addArea.innerHTML = `
+      <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:8px">＋ 新規部門を追加（${escH(grp.grpLabel)}）</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+        <div><label style="font-size:10px;color:var(--gray5);font-weight:700;display:block;margin-bottom:3px">部門名 *</label>
+          <input type="text" id="new-dept-label-${gi}" placeholder="例: 新工場" style="width:100%;font-size:12px;padding:6px 8px;border:1px solid var(--gray3);border-radius:5px;outline:none;font-family:'Noto Sans JP',sans-serif"></div>
+        <div><label style="font-size:10px;color:var(--gray5);font-weight:700;display:block;margin-bottom:3px">サブグループ</label>
+          <select id="new-dept-sub-${gi}" style="width:100%;font-size:12px;padding:6px 8px;border:1px solid var(--gray3);border-radius:5px;outline:none;font-family:'Noto Sans JP',sans-serif">
+            ${grp.subs.map(s => `<option value="${escH(s.subLabel)}">${escH(s.subLabel)}</option>`).join('')}
+          </select></div>
+      </div>
+      <div style="margin-bottom:6px"><label style="font-size:10px;color:var(--gray5);font-weight:700;display:block;margin-bottom:3px">業務内容・説明</label>
+        <textarea id="new-dept-desc-${gi}" placeholder="この部門が担う業務内容..." style="width:100%;min-height:48px;font-size:12px;padding:6px 8px;border:1px solid var(--gray3);border-radius:5px;outline:none;font-family:'Noto Sans JP',sans-serif;resize:vertical"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div><label style="font-size:10px;color:var(--gray5);font-weight:700;display:block;margin-bottom:3px">主要な監査着眼点</label>
+          <textarea id="new-dept-points-${gi}" placeholder="監査で確認すべきポイント..." style="width:100%;min-height:48px;font-size:12px;padding:6px 8px;border:1px solid var(--gray3);border-radius:5px;outline:none;font-family:'Noto Sans JP',sans-serif;resize:vertical"></textarea></div>
+        <div><label style="font-size:10px;color:var(--gray5);font-weight:700;display:block;margin-bottom:3px">ISO観点のリスク</label>
+          <textarea id="new-dept-risks-${gi}" placeholder="ISO規格上の主なリスク..." style="width:100%;min-height:48px;font-size:12px;padding:6px 8px;border:1px solid var(--gray3);border-radius:5px;outline:none;font-family:'Noto Sans JP',sans-serif;resize:vertical"></textarea></div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-navy btn-sm" onclick="confirmAddDept(${gi})">＋ 追加する</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('dept-add-area-${gi}').style.display='none'">キャンセル</button>
+      </div>`;
+    grpEl.appendChild(addArea);
+    wrap.appendChild(grpEl);
+  });
+}
+
+function updateDeptField(grpKey, si, ii, field, val) {
+  const grp = MASTER.find(g => g.grpKey === grpKey);
+  if (grp) grp.subs[si].items[ii][field] = val;
+}
+function deleteDeptItem(grpKey, si, ii) {
+  if (!confirm('この部門を削除しますか？')) return;
+  const grp = MASTER.find(g => g.grpKey === grpKey);
+  if (grp) { grp.subs[si].items.splice(ii, 1); renderDeptSettings(); }
+}
+function resetDeptItem(grpKey, si, itemKey) {
+  const defGrp = MASTER_DEFAULT.find(g => g.grpKey === grpKey);
+  const grp = MASTER.find(g => g.grpKey === grpKey);
+  if (!defGrp || !grp) return;
+  const defItem = defGrp.subs[si]?.items.find(i => i.key === itemKey);
+  const item = grp.subs[si]?.items.find(i => i.key === itemKey);
+  if (defItem && item) { item.desc = defItem.desc; item.points = defItem.points; item.risks = defItem.risks; renderDeptSettings(); }
+}
+function promptAddDept(gi) {
+  const area = document.getElementById('dept-add-area-' + gi);
+  if (area) area.style.display = area.style.display === 'none' ? 'block' : 'none';
+}
+function promptAddSub(gi) {
+  const name = prompt('新しいサブグループ名を入力してください');
+  if (!name || !name.trim()) return;
+  MASTER[gi].subs.push({ subLabel: name.trim(), items: [] });
+  renderDeptSettings();
+}
+function confirmAddDept(gi) {
+  const label  = (document.getElementById('new-dept-label-' + gi)?.value || '').trim();
+  const subLbl = document.getElementById('new-dept-sub-' + gi)?.value;
+  const desc   = (document.getElementById('new-dept-desc-' + gi)?.value || '').trim();
+  const points = (document.getElementById('new-dept-points-' + gi)?.value || '').trim();
+  const risks  = (document.getElementById('new-dept-risks-' + gi)?.value || '').trim();
+  if (!label) { alert('部門名は必須です'); return; }
+  const grp = MASTER[gi];
+  let sub = grp.subs.find(s => s.subLabel === subLbl);
+  if (!sub) { sub = { subLabel: subLbl || '新規', items: [] }; grp.subs.push(sub); }
+  sub.items.push({ key: 'custom_' + Date.now(), label, desc, points, risks });
+  renderDeptSettings();
+  document.getElementById('dept-add-area-' + gi).style.display = 'none';
+}
+
+// ============================
+// MINUTES AI ANALYSIS
+// ============================
+let minAiResults = [];
+let recognition = null;
+let recTimerInterval = null;
+let recSeconds = 0;
+let fullTranscript = '';
+
+function openMinutesModal() {
+  document.getElementById('minutes-modal-overlay').classList.add('open');
+  document.getElementById('minutes-text-input').value = '';
+  resetMinResult();
+  switchMinutesTab('text');
+}
+function closeMinutesModal() {
+  document.getElementById('minutes-modal-overlay').classList.remove('open');
+  stopRecording();
+}
+function switchMinutesTab(t) {
+  ['text','voice'].forEach(x => {
+    document.getElementById('mtab-'+x).classList.toggle('on', x===t);
+    document.getElementById('mpane-'+x).classList.toggle('on', x===t);
+  });
+  resetMinResult();
+}
+function resetMinResult() {
+  document.getElementById('min-loading').style.display = 'none';
+  document.getElementById('min-result').style.display = 'none';
+  document.getElementById('min-result-body').innerHTML = '';
+  minAiResults = [];
+}
+
+function startRecording() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('このブラウザは音声認識に対応していません。Chrome/Edgeをご使用ください。'); return; }
+  fullTranscript = '';
+  recognition = new SR();
+  recognition.lang = 'ja-JP';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.onresult = (e) => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) fullTranscript += t + '\n';
+      else interim = t;
+    }
+    const box = document.getElementById('transcript-box');
+    if (box) box.textContent = fullTranscript + (interim ? '（' + interim + '）' : '');
+  };
+  recognition.onerror = (e) => { if (e.error !== 'no-speech') stopRecording(); };
+  recognition.onend = () => {
+    // 録音中（recognition が null でない）ならブラウザが自動停止しても再起動
+    if (recognition) {
+      try { recognition.start(); } catch(e) {}
+    }
+  };
+  recognition.start();
+  document.getElementById('rec-idle').style.display = 'none';
+  document.getElementById('rec-active').style.display = 'block';
+  document.getElementById('rec-area').classList.add('recording');
+  document.getElementById('voice-transcript-wrap').style.display = 'block';
+  recSeconds = 0;
+  recTimerInterval = setInterval(() => {
+    recSeconds++;
+    const m = String(Math.floor(recSeconds/60)).padStart(2,'0');
+    const s = String(recSeconds%60).padStart(2,'0');
+    document.getElementById('rec-timer').textContent = m + ':' + s;
+  }, 1000);
+}
+function stopRecording() {
+  if (recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
+  clearInterval(recTimerInterval);
+  const idle = document.getElementById('rec-idle');
+  const active = document.getElementById('rec-active');
+  const area = document.getElementById('rec-area');
+  if (idle) idle.style.display = 'block';
+  if (active) active.style.display = 'none';
+  if (area) area.classList.remove('recording');
+}
+function clearTranscript() {
+  fullTranscript = '';
+  const box = document.getElementById('transcript-box');
+  if (box) box.textContent = '';
+  document.getElementById('voice-transcript-wrap').style.display = 'none';
+  resetMinResult();
+}
+
+async function runMinutesAI(source) {
+  const apiKey = document.getElementById('apikey').value.trim();
+  if (!apiKey) { alert('APIキーを入力してください（質問生成タブで設定）'); return; }
+  let text = source === 'text'
+    ? document.getElementById('minutes-text-input').value.trim()
+    : document.getElementById('transcript-box').textContent.trim();
+  if (!text) { alert('議事録のテキストを入力してください'); return; }
+  const useStds = [];
+  if (document.getElementById('min-std-9001')?.checked) useStds.push('ISO 9001:2015');
+  if (document.getElementById('min-std-22301')?.checked) useStds.push('ISO 22301:2019');
+  if (!useStds.length) { alert('対象規格を1つ以上選択してください'); return; }
+  resetMinResult();
+  document.getElementById('min-loading').style.display = 'block';
+  const prompt = `あなたはクリーニング業のISO内部監査の専門家です。以下の内部監査の議事録・メモを読んで、各事実・発言を適切に分類してください。
+
+【対象規格】${useStds.join('、')}
+【業種】クリーニング業（リネンサプライ・ユニフォームサービス・院内派遣・カーテンメンテナンス）
+
+【議事録】
+${text}
+
+【分類区分】
+- major: 重大な不適合（規格要求事項を明確に満たしていない）
+- minor: 軽微な不適合（部分的な不備・逸脱）
+- obs: 観察事項（問題の兆候、潜在リスク、改善余地）
+- rec: 改善推奨事項（不適合ではないが推奨する改善）
+- good: 良好事例（適切に実施されている優れた取り組み）
+
+【出力形式】JSONのみ。説明文不要。
+{"items":[{"category":"major|minor|obs|rec|good","clause":"ISO 9001 §8.5.1 形式","finding":"指摘内容（50字以内）","detail":"詳細説明","suggestion":"対応策・方向性（良好事例は空でも可）"}]}
+
+議事録の内容をすべて抽出して分類してください。`;
+  try {
+    const model = document.getElementById('model-sel').value;
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({ model, messages: [
+        { role: 'system', content: 'あなたはISO内部監査の専門家です。必ずJSON形式のみで返答してください。' },
+        { role: 'user', content: prompt }
+      ], temperature: 0.3, max_tokens: 4096 })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error?.message || 'APIエラー');
+    const raw = data?.choices?.[0]?.message?.content || '';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const si = clean.indexOf('{'), ei = clean.lastIndexOf('}');
+    const parsed = JSON.parse(si >= 0 && ei > si ? clean.substring(si, ei+1) : clean);
+    minAiResults = parsed.items || [];
+    renderMinResults();
+  } catch(e) {
+    alert('AI分析に失敗しました：' + e.message);
+  } finally {
+    document.getElementById('min-loading').style.display = 'none';
+  }
+}
+
+const MIN_CAT_META = {
+  major: { label:'① 不適合事項（Major NC）', color:'#D9534F' },
+  minor: { label:'② 軽微な不適合（Minor NC）', color:'#E88C3A' },
+  obs:   { label:'③ 観察事項', color:'#C9920A' },
+  rec:   { label:'④ 改善推奨事項', color:'#185FA5' },
+  good:  { label:'⑤ 良好事例', color:'#0F6E56' },
+};
+
+function renderMinResults() {
+  const body = document.getElementById('min-result-body');
+  if (!minAiResults.length) {
+    body.innerHTML = '<div style="text-align:center;color:var(--gray4);padding:1rem">分類できる内容が見つかりませんでした</div>';
+    document.getElementById('min-result').style.display = 'block';
+    return;
+  }
+  const groups = {};
+  minAiResults.forEach((item, idx) => {
+    if (!groups[item.category]) groups[item.category] = [];
+    groups[item.category].push({ ...item, _idx: idx });
+  });
+  let html = '';
+  ['major','minor','obs','rec','good'].forEach(cat => {
+    if (!groups[cat]) return;
+    const meta = MIN_CAT_META[cat];
+    html += `<div class="ai-result-card" style="border-color:${meta.color}">
+      <div class="ai-result-card-hdr" style="background:${meta.color}">
+        <span>${meta.label}</span><span style="font-size:10px;font-weight:400;opacity:.85">${groups[cat].length}件</span>
+      </div><div class="ai-result-card-body">`;
+    groups[cat].forEach(item => {
+      html += `<div class="check-row">
+        <input type="checkbox" id="minchk-${item._idx}" checked>
+        <div class="check-row-content">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap">
+            <span class="ai-clause-tag">${esc(item.clause||'規格項番不明')}</span>
+            <span style="font-size:12px;font-weight:600;color:var(--text)">${esc(item.finding||'')}</span>
+          </div>
+          <div style="font-size:11px;color:var(--gray5);line-height:1.6;margin-bottom:${item.suggestion?'3px':'0'}">${esc(item.detail||'')}</div>
+          ${item.suggestion ? `<div style="font-size:11px;color:var(--blue);line-height:1.6">💡 ${esc(item.suggestion)}</div>` : ''}
+        </div></div>`;
+    });
+    html += `</div></div>`;
+  });
+  body.innerHTML = html;
+  document.getElementById('min-result').style.display = 'block';
+}
+
+function toggleAllMinResults(checked) {
+  minAiResults.forEach((_, i) => {
+    const chk = document.getElementById('minchk-'+i);
+    if (chk) chk.checked = checked;
+  });
+}
+
+function applyMinutesToReport() {
+  const selected = minAiResults.filter((_, i) => {
+    const chk = document.getElementById('minchk-'+i);
+    return chk && chk.checked;
+  });
+  if (!selected.length) { alert('反映する項目を1つ以上選択してください'); return; }
+  selected.forEach(item => {
+    const key = item.category;
+    if (!rptSections[key]) return;
+    const newRow = {
+      clause: item.clause || '',
+      finding: item.finding + (item.detail ? '\n' + item.detail : ''),
+      action: item.suggestion || ''
+    };
+    const emptyIdx = rptSections[key].findIndex(r => !r.finding && !r.clause);
+    if (emptyIdx >= 0) rptSections[key][emptyIdx] = newRow;
+    else rptSections[key].push(newRow);
+  });
+  closeMinutesModal();
+  if (!document.getElementById('report-editor-overlay').classList.contains('open')) {
+    openNewReport();
+  }
+  renderFindingSections();
+  const count = selected.length;
+  setTimeout(() => { alert(`✅ ${count}件の所見を報告書に反映しました。\n内容を確認・編集後、「保存」してください。`); }, 300);
+}
+</script>
+</body>
+</html>
